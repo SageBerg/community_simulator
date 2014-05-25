@@ -2,7 +2,7 @@
 community_simulator.py
 the main program
 
-Sage Berg
+Sage Berg, Erica Johnson
 Created 25 May 2014
 '''
 
