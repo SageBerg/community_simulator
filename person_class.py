@@ -15,8 +15,8 @@ from last import *
 class person():
 
     def __init__(self):
-        #self.gender = self.gender_gen()
-        self.name = self.name_gen() 
+        self.gender = self.gender_gen()
+        self.first_name = self.name_gen() 
         self.age = 0
 
         #passive traits
@@ -47,6 +47,11 @@ class person():
         #self.children
         #self.mother
         #self.father
+
+    def gender_gen(self):
+        return choice(['female', 'male'])        
          
     def name_gen(self): 
-        return choice(female_first_list) 
+        if self.gender == 'female':
+           return choice(female_first_list) + " " + choice(last_list)
+        return choice(male_first_list) + " " + choice(last_list)
