@@ -3,7 +3,7 @@ person_class.py
 the core unit of the economy simulator 
 each person has attritutes that help them make important decisions 
 
-Sage Berg
+Sage Berg, Erica Johnson
 Creaded 25 May 2014
 '''
 
