@@ -13,7 +13,7 @@ from female_first import *
 from male_first import *
 from last import *
 
-class person():
+class Person():
 
     def __init__(self):
         self.gender = self.gender_gen()
@@ -21,7 +21,7 @@ class person():
         self.age = 0
 
         #passive traits
-        self.alive = True
+        #self.alive = True
         #self.pride
         #self.morality
         #self.intelligence
@@ -48,6 +48,16 @@ class person():
         #self.children
         #self.mother
         #self.father
+
+    def death_chance(self):
+        if ranint(0,29) == 0:
+            return True
+        return False
+
+    def give_birth_chance(self):
+        if self.gender == 'female' and self.age > 12 and self.age <= 55:
+            if randint(0,4) == 0:
+                return Person()
 
     def gender_gen(self):
         return choice(['female', 'male'])        
