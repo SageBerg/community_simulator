@@ -1,10 +1,11 @@
 '''
 person_class.py
-the core unit of the economy simulator 
+the core unit of the community simulator 
 each person has attritutes that help them make important decisions 
 
 Sage Berg, Erica Johnson
-Creaded 25 May 2014
+Creaded 25 May  2014
+Edited  08 June 2014
 '''
 
 from random import *
@@ -16,7 +17,7 @@ class person():
 
     def __init__(self):
         self.gender = self.gender_gen()
-        self.first_name = self.name_gen() 
+        self.name = self.name_gen() 
         self.age = 0
 
         #passive traits
