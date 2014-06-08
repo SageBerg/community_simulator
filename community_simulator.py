@@ -11,7 +11,7 @@ from person_class import person
 
 def main(person):
     person_list = list()
-    for i in range(10):
+    for i in range(15):
         person_list.append(person())
     for person in person_list:
         print(person.name)
