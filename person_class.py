@@ -15,9 +15,18 @@ from last import *
 
 class Person():
 
-    def __init__(self):
+    @staticmethod
+    def last_name_gen():
+        return choice(last_list)
+
+    def __init__(self, last_name=None):
         self.gender = self.gender_gen()
-        self.name = self.name_gen() 
+        self.first_name = self.first_name_gen() 
+        if last_name == None:
+            self.last_name = Person.last_name_gen() 
+        else:
+            self.last_name = last_name
+        self.name = self.first_name + ' ' + self.last_name
         self.age = 0
 
         #passive traits
@@ -50,19 +59,20 @@ class Person():
         #self.father
 
     def death_chance(self):
-        if ranint(0,29) == 0:
+        if randint(0,29) == 0:
             return True
         return False
 
-    def give_birth_chance(self):
+    def give_birth_chance(self, last_name):
         if self.gender == 'female' and self.age > 12 and self.age <= 55:
-            if randint(0,4) == 0:
-                return Person()
+            if randint(0,10) == 0:
+                return Person(last_name)
 
     def gender_gen(self):
         return choice(['female', 'male'])        
          
-    def name_gen(self): 
+    def first_name_gen(self): 
         if self.gender == 'female':
-           return choice(female_first_list) + " " + choice(last_list)
-        return choice(male_first_list) + " " + choice(last_list)
+           return choice(female_first_list)
+        return choice(male_first_list)
+
