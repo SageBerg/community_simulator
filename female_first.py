@@ -408,7 +408,7 @@ female_first_list = [
 'Osanna',
 'Pam',
 'Pamela',
-'PansyPansy',
+'Pansy',
 'Patra',
 'Patricia',
 'Paula',
