@@ -48,18 +48,16 @@ def birth():
             print(baby.name + ' was born to ' + person.name + '!')
 
 def marriage():
+    global single_male_set
+    global single_female_set
     for person in person_list:
         if person.spouse == None and person.age >= 10:
             if person.gender == 'male':
                 single_male_set.add(person)
             else:
                 single_female_set.add(person)
-    for male in single_male_set:
-        if male.alive == False:
-            single_male_set.remove(male)
-    for female in single_female_set:
-        if female.alive == False:
-            single_female_set.remove(female)
+    single_male_set = {male for male in single_male_set if male.alive}
+    single_female_set = {female for female in single_female_set if female.alive}
     print("          single male length: " + str(len(single_male_set)))
     for male in single_male_set:
         print("               " + male.name)
