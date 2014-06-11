@@ -20,7 +20,7 @@ class Person():
     def last_name_gen():
         return choice(last_list)
 
-    def __init__(self, last_name=None):
+    def __init__(self, last_name=None, mother=None, father=None):
         self.gender = self.gender_gen()
         self.first_name = self.first_name_gen() 
         if last_name == None:
@@ -56,8 +56,8 @@ class Person():
         #self.servants
         self.spouse = None
         #self.children
-        #self.mother
-        #self.father
+        self.mother = mother
+        self.father = father
 
     def death_chance(self):
         if randint(0,100) <= death_dict[self.age]*100:
@@ -66,8 +66,9 @@ class Person():
 
     def give_birth_chance(self, last_name):
         if self.gender == 'female' and self.age > 12 and self.age <= 55 and self.spouse and self.spouse.alive:
-            if randint(0,2) == 0:
-                return Person(last_name)
+            if randint(0,100) < 33:
+                baby = Person(last_name, mother=self, father=self.spouse)
+                return baby
     
     def search_for_spouse(self, singles):
         for potential_mate in (singles):
@@ -80,7 +81,7 @@ class Person():
                 else:
                     bride = self
                     groom = potential_mate
-                print(bride.name + ' married ' + groom.name + '!!!')
+                #print(bride.name + ' married ' + groom.name + '!!!')
                 bride.spouse = groom
                 groom.spouse = bride
                 bride.last_name = groom.last_name
@@ -96,3 +97,7 @@ class Person():
            return choice(female_first_list)
         return choice(male_first_list)
 
+def print_fathers(person):
+    while person:
+        print(person.name)
+        person = person.father
