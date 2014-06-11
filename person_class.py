@@ -65,28 +65,28 @@ class Person():
         return False
 
     def give_birth_chance(self, last_name):
-        if self.gender == 'female' and self.age > 12 and self.age <= 55:
-            if randint(0,6) == 0:
+        if self.gender == 'female' and self.age > 12 and self.age <= 55 and self.spouse and self.spouse.alive:
+            if randint(0,2) == 0:
                 return Person(last_name)
     
-    def search_for_spouse(self, single_list):
-        for i in range(len(single_list)):
+    def search_for_spouse(self, singles):
+        for potential_mate in (singles):
             #print(self.name + ' is looking for love')
-            #print(len(single_list))
-            if single_list[i].last_name != self.last_name and \
-            single_list[i].spouse == None and \
-            self.spouse == None:
-                if single_list[i].gender == 'female':
-                    bride = single_list[i]
+            #print(len(singles))
+            if potential_mate.last_name != self.last_name:
+                if potential_mate.gender == 'female':
+                    bride = potential_mate
                     groom = self
                 else:
                     bride = self
-                    groom = single_list[i]
+                    groom = potential_mate
                 print(bride.name + ' married ' + groom.name + '!!!')
                 bride.spouse = groom
                 groom.spouse = bride
                 bride.last_name = groom.last_name
                 bride.name = bride.first_name + ' ' + bride.last_name
+                singles.remove(potential_mate)
+                return
 
     def gender_gen(self):
         return choice(['female', 'male'])        

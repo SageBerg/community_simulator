@@ -58,12 +58,14 @@ def marriage():
                 single_female_set.add(person)
     single_male_set = {male for male in single_male_set if male.alive}
     single_female_set = {female for female in single_female_set if female.alive}
-    print("          single male length: " + str(len(single_male_set)))
+    #print("          single male length: " + str(len(single_male_set)))
     for male in single_male_set:
-        print("               " + male.name)
-    print("          single female length: " + str(len(single_female_set)))
+        male.search_for_spouse(single_female_set)
+        #print("               " + male.name)
+    #print("          single female length: " + str(len(single_female_set)))
     for female in single_female_set:
-        print("               " + female.name)
+        female.search_for_spouse(single_male_set)
+        #print("               " + female.name)
 #     for male in single_male_set:
 #         male.search_for_spouse(single_female_set)
 #     male_still_single = list()
