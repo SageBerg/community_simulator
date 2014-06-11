@@ -2,9 +2,9 @@
 community_simulator.py
 the main program
 
-Sage Berg, Erica Johnson
+Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
-Edited  08 June 2014
+Edited  10 June 2014
 '''
 
 from person_class import Person, print_fathers
@@ -16,26 +16,29 @@ single_female_set = set()
 def main():
     for i in range(100):
         person_list.append(Person())
-#     for person in person_list:
-#         print(person.name)
-    for i in range(1000):
+    for person in person_list:
+        person.age = 10
+        person.food = 5
+    for i in range(200):
         death()
         time()
         birth()
         marriage()
+        farm()
+        eat()
         print('year ' + str(i))
-        print('there are ' + str(len(person_list)) + ' people alive')
+        #print('there are ' + str(len(person_list)) + ' people alive')
     for person in person_list:
         print(person.name + '(' + str(person.age) + ') still lives.')
-        print_fathers(person)
-        print()
+        #print_fathers(person)
+        #print()
     print(len(person_list))
 
 def death():
     for person in person_list:
-        if person.death_chance() == True:
+        person.death_chance()
+        if person.alive == False:
             #print(person.name + ' died at age: ' + str(person.age))
-            person.alive = False
             person_list.remove(person)
         
 def time():
@@ -68,5 +71,13 @@ def marriage():
     for female in single_female_set:
         female.search_for_spouse(single_male_set)
         #print("               " + female.name)
+
+def farm():
+    for person in person_list:
+        person.farm()
+
+def eat():
+    for person in person_list:
+        person.eat()
     
 main()

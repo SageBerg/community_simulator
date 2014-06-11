@@ -3,9 +3,9 @@ person_class.py
 the core unit of the community simulator 
 each person has attritutes that help them make important decisions 
 
-Sage Berg, Erica Johnson
+Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
-Edited  09 June 2014
+Edited  10 June 2014
 '''
 
 from random import *
@@ -40,11 +40,12 @@ class Person():
 
         #skills
         #self.persuation
-        #self.farming
+        #self.farm = 0
         #self.parenting
         #self.fight
        
         #OWNERSHIP
+        self.food = 0
         #self.home_address 
         #self.wealth = 0
         #self.owns = dict() 
@@ -55,14 +56,13 @@ class Person():
         #self.boss
         #self.servants
         self.spouse = None
-        #self.children
+        #self.children =
         self.mother = mother
         self.father = father
 
-    def death_chance(self):
+    def death_chance(self): #death from old age and sickness
         if randint(0,100) <= death_dict[self.age]*100:
-            return True
-        return False
+            self.alive = False
 
     def give_birth_chance(self, last_name):
         if self.gender == 'female' and self.age > 12 and self.age <= 55 and self.spouse and self.spouse.alive:
@@ -96,6 +96,27 @@ class Person():
         if self.gender == 'female':
            return choice(female_first_list)
         return choice(male_first_list)
+
+    def farm(self):
+        self.food += randint(0,5)
+
+    def eat(self):
+        if self.age < 10:
+            if self.father.food > 0:
+                self.father.food -= 1
+            elif self.mother.food > 0:
+                self.mother.food -= 1
+            else:
+                self.alive = False
+                print('baby ' + self.name + ' starved to death at age ' + str(self.age))
+        else:
+            if self.food > 0:
+                self.food -= 1
+            elif self.food == 0 and self.spouse != None and self.spouse.food > 1:
+                self.spouse.food -= 1
+            else: 
+                self.alive = False
+                print(self.name + ' starved to death 0X')
 
 def print_fathers(person):
     while person:
