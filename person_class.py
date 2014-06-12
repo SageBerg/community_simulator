@@ -5,7 +5,7 @@ each person has attritutes that help them make important decisions
 
 Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
-Edited  10 June 2014
+Edited  12 June 2014
 '''
 
 from random import *
@@ -40,7 +40,7 @@ class Person():
 
         #skills
         #self.persuation
-        #self.farm = 0
+        self.farm_skill = 5
         #self.parenting
         #self.fight
        
@@ -48,7 +48,7 @@ class Person():
         self.food = 0
         #self.home_address 
         #self.wealth = 0
-        #self.owns = dict() 
+        self.owns = dict() 
 
         #RELATIONS
         #self.relation_to_authority
@@ -98,7 +98,10 @@ class Person():
         return choice(male_first_list)
 
     def farm(self):
-        self.food += randint(0,5)
+        production = self.farm_skill
+        if 'plow' in self.owns:
+            production += 2
+        self.food += randint(0, production)
 
     def eat(self):
         if self.age < 10:
@@ -117,6 +120,12 @@ class Person():
             else: 
                 self.alive = False
                 print(self.name + ' starved to death 0X')
+    
+    def buy_plow(self):
+        if self.food > 14 and 'plow' not in self.owns:
+            self.food -= 15
+            self.owns['plow'] = 1
+            #print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
 def print_fathers(person):
     while person:
