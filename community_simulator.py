@@ -21,7 +21,7 @@ def main():
     for person in person_list:
         person.age = 10
         person.food = 5
-    for i in range(400):  #the number of years
+    for i in range(1000):  #the number of years
         plague(person_list)
         death()
         time()

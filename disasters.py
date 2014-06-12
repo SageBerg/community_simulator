@@ -11,7 +11,7 @@ from random import *
 
 def plague(person_list):
     if randint(0, 100) == 0:
-        death_threshold = randint(1, 100)
+        death_threshold = randint(1, 50)
         for person in person_list:
             if randint(0, 100) < death_threshold:
                 print(person.name + ' died of plague 0X 0X 0X 0X 0X.')
