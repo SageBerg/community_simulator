@@ -1,7 +1,7 @@
 '''
 person_class.py
 the core unit of the community simulator 
-each person has attritutes that help them make important decisions 
+each person has attributes that help them make important decisions 
 
 Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
@@ -39,7 +39,8 @@ class Person():
         #self.creativity
 
         #skills
-        #self.persuation
+        self.job #= function 
+        #self.persuasion
         self.farm_skill = 5
         #self.parenting
         #self.fight
@@ -126,6 +127,12 @@ class Person():
             self.food -= 15
             self.owns['plow'] = 1
             #print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            
+    def make_plow(self):
+        self.owns['plow'] = randint(1, 2)
+        
+    def change_job(self):
+        
 
 def print_fathers(person):
     while person:

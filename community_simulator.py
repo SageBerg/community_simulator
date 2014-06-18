@@ -27,7 +27,7 @@ def main():
         time()
         birth()
         marriage()
-        farm()
+        work()
         eat()
         print('year ' + str(i))
         print('there are ' + str(len(person_list)) + ' people alive')
@@ -81,10 +81,10 @@ def marriage():
         female.search_for_spouse(single_male_set)
         #print("               " + female.name)
 
-def farm():
+def work():
     for person in person_list:
         person.buy_plow()
-        person.farm()
+        person.job()
 
 def eat():
     for person in person_list:
