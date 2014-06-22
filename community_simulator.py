@@ -48,14 +48,14 @@ def main():
         s += person.children 
     print('average children: ' + str(round(s/(len(person_list)+1), 2)))
     farmers = 0
-    plowwrights = 0
+    plowrights = 0
     for person in person_list:
         if person.job == person.farm:
             farmers += 1
         else:
-            plowwrights += 1
+            plowrights += 1
     print('number of farmers: ' + str(farmers))
-    print('number of plowwrights: ' + str(plowwrights))
+    print('number of plowrights: ' + str(plowrights))
 
 def death():
     global plow_market
