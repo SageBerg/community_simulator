@@ -4,16 +4,17 @@ the main program
 
 Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
-Edited  12 June 2014
 '''
 
 from person_class import Person, print_fathers
 from disasters import *
+from queue import PriorityQueue
 
 person_list = list()
 single_male_set = set()
 single_female_set = set()
 family = dict()
+plow_market = PriorityQueue()
 
 def main():
     for i in range(700):
@@ -42,13 +43,33 @@ def main():
     for name in family:
         print(name, family[name])
     print(len(person_list))
+    s = 0
+    for person in person_list:
+        s += person.children 
+    print('average children: ' + str(round(s/(len(person_list)+1), 2)))
+    farmers = 0
+    plowwrights = 0
+    for person in person_list:
+        if person.job == person.farm:
+            farmers += 1
+        else:
+            plowwrights += 1
+    print('number of farmers: ' + str(farmers))
+    print('number of plowwrights: ' + str(plowwrights))
 
 def death():
+    global plow_market
     for person in person_list:
         person.death_chance()
         if person.alive == False:
             #print(person.name + ' died at age: ' + str(person.age))
             person_list.remove(person)
+    new_plow_market = PriorityQueue()
+    for i in range(plow_market.qsize()):
+        seller = plow_market.get()
+        if seller[2].alive:
+            new_plow_market.put(seller)
+    plow_market = new_plow_market
         
 def time():
     for person in person_list:
@@ -83,8 +104,10 @@ def marriage():
 
 def work():
     for person in person_list:
-        person.buy_plow()
-        person.job()
+        if person.age >= 10:
+            if person.job == person.farm:
+                person.change_job(plow_market)
+            person.job(plow_market)
 
 def eat():
     for person in person_list:

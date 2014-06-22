@@ -5,7 +5,6 @@ each person has attributes that help them make important decisions
 
 Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
-Edited  12 June 2014
 '''
 
 from random import *
@@ -39,9 +38,10 @@ class Person():
         #self.creativity
 
         #skills
-        self.job #= function 
+        self.job = self.farm #self.job = function
+        self.price = self.set_price() 
         #self.persuasion
-        self.farm_skill = 5
+        self.farm_skill = 5 
         #self.parenting
         #self.fight
        
@@ -57,18 +57,25 @@ class Person():
         #self.boss
         #self.servants
         self.spouse = None
-        #self.children =
+        self.children = 0
         self.mother = mother
         self.father = father
 
     def death_chance(self): #death from old age and sickness
         if randint(0,100) <= death_dict[self.age]*100:
+            try:
+                self.mother.children -= 1
+                self.father.children -= 1
+            except:
+                print('initial people don\'t have parents') 
             self.alive = False
 
     def give_birth_chance(self, last_name):
         if self.gender == 'female' and self.age > 12 and self.age <= 55 and self.spouse and self.spouse.alive:
             if randint(0,100) < 33:
                 baby = Person(last_name, mother=self, father=self.spouse)
+                self.children += 1
+                self.spouse.children += 1
                 return baby
     
     def search_for_spouse(self, singles):
@@ -98,11 +105,12 @@ class Person():
            return choice(female_first_list)
         return choice(male_first_list)
 
-    def farm(self):
+    def farm(self, market):
         production = self.farm_skill
         if 'plow' in self.owns:
             production += 2
-        self.food += randint(0, production)
+        self.food += randint(2, production)
+        self.buy_plow(market)
 
     def eat(self):
         if self.age < 10:
@@ -122,17 +130,28 @@ class Person():
                 self.alive = False
                 print(self.name + ' starved to death 0X')
     
-    def buy_plow(self):
-        if self.food > 14 and 'plow' not in self.owns:
-            self.food -= 15
+    def buy_plow(self, market):
+        if self.food > market.queue[0][0] and 'plow' not in self.owns:
+            seller = market.get()
+            self.food -= seller[0] #the price 
+            seller[2].food += seller[0] #give seller food payment
             self.owns['plow'] = 1
-            #print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+           # print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             
-    def make_plow(self):
-        self.owns['plow'] = randint(1, 2)
+    def make_plow(self, market):
+        for i in range( randint(1, 2) ):
+            market.put( (self.price, id(self), self) )
         
-    def change_job(self):
-        
+    def change_job(self, market):
+        if market.empty():
+            self.job = self.make_plow
+            print(self.name + ' was first to join the plow market. Price: ' + str(self.price))
+        elif market.queue[0][0] > 5:
+            self.job = self.make_plow
+            print(self.name + ' joined the plow market.')
+    
+    def set_price(self):
+        return randint(3,10)
 
 def print_fathers(person):
     while person:
