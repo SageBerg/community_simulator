@@ -17,20 +17,26 @@ family = dict()
 plow_market = PriorityQueue()
 
 def main():
-    for i in range(700):
+    for i in range(1000):
         person_list.append(Person())
     for person in person_list:
         person.age = 10
         person.food = 5
-    for i in range(1000):  #the number of years
+
+    famine_flag = False
+    for i in range(200):  #the number of years
         plague(person_list)
+        if famine_flag == False:
+            famine_flag = famine(person_list)
         death()
         time()
         birth()
         marriage()
         work()
         eat()
-        print('year ' + str(i))
+        if famine_flag: 
+            famine_flag = end_famine_maybe(person_list)
+        print('year ' + str(i)) 
         print('there are ' + str(len(person_list)) + ' people alive')
     for person in person_list:
         if person.last_name in family:

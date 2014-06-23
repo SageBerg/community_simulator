@@ -67,7 +67,8 @@ class Person():
                 self.mother.children -= 1
                 self.father.children -= 1
             except:
-                print('initial people don\'t have parents') 
+                #print('initial people don\'t have parents') 
+                pass
             self.alive = False
 
     def give_birth_chance(self, last_name):
@@ -109,7 +110,7 @@ class Person():
         production = self.farm_skill
         if 'plow' in self.owns:
             production += 2
-        self.food += randint(2, production)
+        self.food += randint(0, production)
         self.buy_plow(market)
 
     def eat(self):
