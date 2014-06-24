@@ -13,19 +13,16 @@ from male_first import *
 from last import *
 from death_dict import *
 
-class Person():
+class Person(object):
 
     @staticmethod
     def last_name_gen():
         return choice(last_list)
 
-    def __init__(self, last_name=None, mother=None, father=None):
+    def __init__(self):
         self.gender = self.gender_gen()
         self.first_name = self.first_name_gen() 
-        if last_name == None:
-            self.last_name = Person.last_name_gen() 
-        else:
-            self.last_name = last_name
+        self.last_name = Person.last_name_gen() 
         self.name = self.first_name + ' ' + self.last_name
         self.age = 0
 
@@ -47,7 +44,7 @@ class Person():
        
         #OWNERSHIP
         self.food = 0
-        #self.home_address 
+        self.home_address = None
         #self.wealth = 0
         self.owns = dict() 
 
@@ -58,8 +55,8 @@ class Person():
         #self.servants
         self.spouse = None
         self.children = 0
-        self.mother = mother
-        self.father = father
+        self.mother = None
+        self.father = None
 
     def death_chance(self): #death from old age and sickness
         if randint(0,100) <= death_dict[self.age]*100:
@@ -71,12 +68,19 @@ class Person():
                 pass
             self.alive = False
 
-    def give_birth_chance(self, last_name):
+    def give_birth_chance(self):
         if self.gender == 'female' and self.age > 12 and self.age <= 55 and self.spouse and self.spouse.alive:
             if randint(0,100) < 33:
-                baby = Person(last_name, mother=self, father=self.spouse)
+                baby = Person()
                 self.children += 1
                 self.spouse.children += 1
+                baby.mother = self
+                baby.father = self.spouse
+                baby.last_name = self.last_name
+                baby.name = baby.first_name + ' ' + baby.last_name
+                baby.home_address = self.home_address
+                self.home_address.occupants.append(baby)
+                #print(baby.name + " was born to " + self.name + " and " + self.spouse.name)
                 return baby
     
     def search_for_spouse(self, singles):
@@ -95,6 +99,11 @@ class Person():
                 groom.spouse = bride
                 bride.last_name = groom.last_name
                 bride.name = bride.first_name + ' ' + bride.last_name
+#                 print('bride home_address occupants: ' + str(bride.home_address.occupants))
+#                 for person in bride.home
+                bride.home_address.occupants.remove(bride)
+                bride.home_address = groom.home_address
+                groom.home_address.occupants.append(bride)
                 singles.remove(potential_mate)
                 return
 
@@ -121,7 +130,7 @@ class Person():
                 self.mother.food -= 1
             else:
                 self.alive = False
-                print('baby ' + self.name + ' starved to death at age ' + str(self.age))
+#                 print('baby ' + self.name + ' starved to death at age ' + str(self.age))
         else:
             if self.food > 0:
                 self.food -= 1
@@ -129,7 +138,7 @@ class Person():
                 self.spouse.food -= 1
             else: 
                 self.alive = False
-                print(self.name + ' starved to death 0X')
+#                 print(self.name + ' starved to death 0X')
     
     def buy_plow(self, market):
         if self.food > market.queue[0][0] and 'plow' not in self.owns:
@@ -146,10 +155,10 @@ class Person():
     def change_job(self, market):
         if market.empty():
             self.job = self.make_plow
-            print(self.name + ' was first to join the plow market. Price: ' + str(self.price))
+#             print(self.name + ' was first to join the plow market. Price: ' + str(self.price))
         elif market.queue[0][0] > 5:
             self.job = self.make_plow
-            print(self.name + ' joined the plow market.')
+#             print(self.name + ' joined the plow market.')
     
     def set_price(self):
         return randint(3,10)
