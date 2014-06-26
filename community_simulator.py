@@ -73,6 +73,7 @@ def main():
         print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
         for person in house.occupants:
             print(person.name + ' age: ' + str(person.age))
+            print("PRIDE: " + str(person.pride))
 
 def death():
     global house_list

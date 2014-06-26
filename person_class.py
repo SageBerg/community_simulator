@@ -25,14 +25,29 @@ class Person(object):
         self.last_name = Person.last_name_gen() 
         self.name = self.first_name + ' ' + self.last_name
         self.age = 0
+        
+        #RELATIONS
+        #self.relation_to_authority
+        #self.relations
+        #self.boss
+        #self.servants
+        self.spouse = None
+        self.children = 0
+        self.mother = None
+        self.father = None
 
         #passive traits
         self.alive = True
-        #self.pride
-        #self.morality
-        #self.intelligence
-        #self.extravagance
-        #self.creativity
+        self.pride = None
+        self.morality = None
+        self.intelligence = None
+        self.extravagance = None
+        self.creativity = None
+        self.pride = self.attribute_gen(self.pride)
+        self.morality = self.attribute_gen(self.morality)
+        self.intelligence = self.attribute_gen(self.intelligence)
+        self.extravagance = self.attribute_gen(self.extravagance)
+        self.creativity = self.attribute_gen(self.creativity)
 
         #skills
         self.job = self.farm #self.job = function
@@ -47,16 +62,7 @@ class Person(object):
         self.home_address = None
         #self.wealth = 0
         self.owns = dict() 
-
-        #RELATIONS
-        #self.relation_to_authority
-        #self.relations
-        #self.boss
-        #self.servants
-        self.spouse = None
-        self.children = 0
-        self.mother = None
-        self.father = None
+        
 
     def death_chance(self): #death from old age and sickness
         if randint(0,100) <= death_dict[self.age]*100:
@@ -162,6 +168,14 @@ class Person(object):
     
     def set_price(self):
         return randint(3,10)
+        
+    def attribute_gen(self, attribute):
+        stat = 0
+        if self.mother != None:
+            stat += round((self.mother.attribute + self.father.attribute) / 2, 0)
+        for i in range(10):
+            stat += randint(-10, 10)
+        return stat
 
 def print_fathers(person):
     while person:
