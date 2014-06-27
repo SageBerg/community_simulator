@@ -9,7 +9,7 @@ Created 25 May  2014
 from person_class import Person, print_fathers
 from disasters import *
 from queue import PriorityQueue
-from house_class import *
+from items import *
 
 person_list = list()
 single_male_set = set()
@@ -25,8 +25,8 @@ def main():
         person.age = 10
         person.food = 5
         house = House()
-        person.owns['house'] = house
-        person.home_address = person.owns['house']
+        person.owns['house'] = [ house ]
+        person.home_address = person.owns['house'][0]
         house.occupants.append(person)
         house_list.append(house)
 
@@ -35,6 +35,8 @@ def main():
         plague(person_list)
         if famine_flag == False:
             famine_flag = famine(person_list)
+        global_decay()
+        destruction()
         death()
         age()
         birth()
@@ -58,7 +60,7 @@ def main():
     print(len(person_list))
     s = 0
     for person in person_list:
-        s += person.children 
+        s += len(person.children)
     print('average children: ' + str(round(s/(len(person_list)+1), 2)))
     farmers = 0
     plowrights = 0
@@ -69,12 +71,35 @@ def main():
             plowrights += 1
     print('number of farmers: ' + str(farmers))
     print('number of plowrights: ' + str(plowrights))
-    for house in house_list:
-        print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
-        for person in house.occupants:
-            print(person.name + ' age: ' + str(person.age))
-            print("PRIDE: " + str(person.pride))
+  #   for house in house_list:
+#         print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
+#         for person in house.occupants:
+#             print(person.name + ' age: ' + str(person.age))
+#             print("MORALITY: " + str(person.morality))
 
+def decay(item):
+    item.durability -= randint(0,5)
+
+def global_decay(): #calls decay on lists of items
+    global house_list
+    for house in house_list:
+        decay(house)
+
+def destruction():
+    global house_list
+    for house in house_list:
+        if house.durability <= 0:
+            house_list.remove(house)
+            #print('a house fell victim to time and neglect')
+            for person in house.occupants:
+                print(person.name)
+    for person in person_list:
+        for item_list in person.owns.values():
+            for item in item_list:
+            	if item.durability <= 0:
+            	    item_list.remove(item) 
+            	    #print(person.name + '\'s house blew up!!!!!!!!!!!!!')
+            
 def death():
     global house_list
     global plow_market

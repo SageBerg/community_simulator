@@ -4,7 +4,7 @@ the core unit of the community simulator
 each person has attributes that help them make important decisions 
 
 Sage Berg, Erica Johnson, Skyler Berg
-Created 25 May  2014
+Created 25 May 2014
 '''
 
 from random import *
@@ -12,6 +12,7 @@ from female_first import *
 from male_first import *
 from last import *
 from death_dict import *
+from items import *
 
 class Person(object):
 
@@ -32,7 +33,7 @@ class Person(object):
         #self.boss
         #self.servants
         self.spouse = None
-        self.children = 0
+        self.children = list()
         self.mother = None
         self.father = None
 
@@ -66,9 +67,22 @@ class Person(object):
 
     def death_chance(self): #death from old age and sickness
         if randint(0,100) <= death_dict[self.age]*100:
+            if len(self.children) > 0:
+                for key in self.owns.keys():
+                    if key not in self.children[0].owns:
+                        self.children[0].owns[key] = self.owns[key]
+                    else:
+                        self.children[0].owns[key] += self.owns[key]
+#                     if self.job == self.make_plow:
+#                         try:
+#                             print('plowright ' + self.name + ' died and left ' + \
+#                             str(len(self.owns['plow'])) + ' plow(s) to the heir ' + self.children[0].name)
+#                         except:
+#                             print('plowright died with no plows')
+#                     print(self.children[0].name + ' inherited ' + str(len(self.owns[key])) + ' ' + key + 's')
             try:
-                self.mother.children -= 1
-                self.father.children -= 1
+                self.mother.children.remove(self)
+                self.father.children.remove(self)
             except:
                 #print('initial people don\'t have parents') 
                 pass
@@ -78,8 +92,8 @@ class Person(object):
         if self.gender == 'female' and self.age > 12 and self.age <= 55 and self.spouse and self.spouse.alive:
             if randint(0,100) < 33:
                 baby = Person()
-                self.children += 1
-                self.spouse.children += 1
+                self.children.append(baby)
+                self.spouse.children.append(baby)
                 baby.mother = self
                 baby.father = self.spouse
                 baby.last_name = self.last_name
@@ -151,7 +165,10 @@ class Person(object):
             seller = market.get()
             self.food -= seller[0] #the price 
             seller[2].food += seller[0] #give seller food payment
-            self.owns['plow'] = 1
+            if 'plow' in self.owns:
+                self.owns['plow'].append( Plow() )
+            else:
+                self.owns['plow'] = [ Plow() ]
            # print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             
     def make_plow(self, market):
@@ -176,6 +193,7 @@ class Person(object):
         for i in range(10):
             stat += randint(-10, 10)
         return stat
+        
 
 def print_fathers(person):
     while person:
