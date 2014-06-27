@@ -19,6 +19,11 @@ class Person(object):
     @staticmethod
     def last_name_gen():
         return choice(last_list)
+        
+    market_job_dict = {
+    'plow_market': make_plow,
+    'house_market': make_house,
+    }
 
     def __init__(self):
         self.gender = self.gender_gen()
@@ -135,12 +140,12 @@ class Person(object):
            return choice(female_first_list)
         return choice(male_first_list)
 
-    def farm(self, market):
+    def farm(self, economy):
         production = self.farm_skill
         if 'plow' in self.owns:
-            production += 2
+            production += randint(0, 4)
         self.food += randint(0, production)
-        self.buy_plow(market)
+        self.buy_plow(economy)
 
     def eat(self):
         if self.age < 10:
@@ -159,30 +164,38 @@ class Person(object):
             else: 
                 self.alive = False
 #                 print(self.name + ' starved to death 0X')
+
+    def own_plow(self, plow = Plow()): #gives self plow
+        if 'plow' in self.owns:
+            self.owns['plow'].append( plow )
+        else:
+            self.owns['plow'] = [ plow ]
     
-    def buy_plow(self, market):
-        if self.food > market.queue[0][0] and 'plow' not in self.owns:
-            seller = market.get()
-            self.food -= seller[0] #the price 
-            seller[2].food += seller[0] #give seller food payment
-            if 'plow' in self.owns:
-                self.owns['plow'].append( Plow() )
-            else:
-                self.owns['plow'] = [ Plow() ]
+    def buy_plow(self, economy):
+        if self.food > economy['plow_market'].queue[0][0] and 'plow' not in self.owns:
+            listing = economy['plow_market'].get()
+            self.food -= listing[0] #the price 
+            listing[2].food += listing[0] #give seller food payment
+            self.own_plow(listing[2].owns['plow'][-1])
+            listing[2].owns['plow'].remove(listing[2].owns['plow'][-1])
            # print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             
-    def make_plow(self, market):
+    def make_plow(self, economy):
         for i in range( randint(1, 2) ):
-            market.put( (self.price, id(self), self) )
+            self.own_plow()
+            economy['plow_market'].put( (self.price, id(self), self) )  #make listing
         
-    def change_job(self, market):
-        if market.empty():
-            self.job = self.make_plow
-#             print(self.name + ' was first to join the plow market. Price: ' + str(self.price))
-        elif market.queue[0][0] > 5:
-            self.job = self.make_plow
-#             print(self.name + ' joined the plow market.')
-    
+    def change_job(self, economy):
+        '''economy is a dictionary mapping "market" strings to priority queues
+        '''
+        for market in economy.keys():
+            if economy[market].empty(): #at least one person will always try each job
+#                print(self.name + ' started a ' + market + '. Price: ' + str(self.price))
+                return market_job_dict[market]
+            elif economy[market].queue[0][0] > 5:
+#                print(self.name + ' joined the plow market.')
+                return market_job_dict[market]
+            
     def set_price(self):
         return randint(3,10)
         

@@ -15,7 +15,9 @@ person_list = list()
 single_male_set = set()
 single_female_set = set()
 family = dict()
-plow_market = PriorityQueue()
+economy = dict()
+economy['plow_market'] = PriorityQueue()
+economy['house_market'] = PriorityQueue()
 house_list = list()
 
 def main():
@@ -47,6 +49,7 @@ def main():
             famine_flag = end_famine_maybe(person_list)
         print('year ' + str(i)) 
         print('there are ' + str(len(person_list)) + ' people alive')
+    
     for person in person_list:
         if person.last_name in family:
             family[person.last_name] += 1
@@ -91,8 +94,8 @@ def destruction():
         if house.durability <= 0:
             house_list.remove(house)
             #print('a house fell victim to time and neglect')
-            for person in house.occupants:
-                print(person.name)
+            # for person in house.occupants:
+#                 print(person.name)
     for person in person_list:
         for item_list in person.owns.values():
             for item in item_list:
@@ -102,18 +105,18 @@ def destruction():
             
 def death():
     global house_list
-    global plow_market
+    global economy
     for person in person_list:
         person.death_chance()
         if person.alive == False:
             #print(person.name + ' died at age: ' + str(person.age))
             person_list.remove(person)
     new_plow_market = PriorityQueue()
-    for i in range(plow_market.qsize()):
-        seller = plow_market.get()
+    for i in range(economy['plow_market'].qsize()):
+        seller = economy['plow_market'].get()
         if seller[2].alive:
             new_plow_market.put(seller)
-    plow_market = new_plow_market
+    economy['plow_market'] = new_plow_market
     for house in house_list: #remove dead people from houses
         for person in house.occupants:
             if person.alive == False:
@@ -153,9 +156,9 @@ def marriage():
 def work():
     for person in person_list:
         if person.age >= 10:
-            if person.job == person.farm:
-                person.change_job(plow_market)
-            person.job(plow_market)
+            if person.food < 1: #people change jobs if their work doesn't get them by
+                person.job = person.change_job(economy)
+            person.job(economy)
 
 def eat():
     for person in person_list:
