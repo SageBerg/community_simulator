@@ -7,12 +7,12 @@ Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May 2014
 '''
 
-from random import *
+from random       import *
 from female_first import *
-from male_first import *
-from last import *
-from death_dict import *
-from items import *
+from male_first   import *
+from last         import *
+from death_dict   import *
+from items        import *
 
 class Person(object):
 
@@ -100,9 +100,23 @@ class Person(object):
                 baby.last_name = self.last_name
                 baby.name = baby.first_name + ' ' + baby.last_name
                 baby.home_address = self.home_address
+                #print(baby.home_address, self.home_address)
+                #if self.home_address:
+                #    print(len(self.home_address.occupants))
                 if self.home_address != None:
                     self.home_address.occupants.append(baby)
+                #if self.home_address:
+                #    print(len(self.home_address.occupants))
+                #    for oc in self.home_address.occupants:
+                #        print(oc.name, oc.age)
                 #print(baby.name + " was born to " + self.name + " and " + self.spouse.name)
+                
+                if self.home_address:
+                    if self.home_address.occupants != self.spouse.home_address.occupants:
+                        raise NameError('parents not living in same house')
+                    if self.home_address.occupants != baby.home_address.occupants:
+                        raise NameError('baby didn\'t come home')
+
                 return baby
     
     def marriage(self, singles):
@@ -116,27 +130,41 @@ class Person(object):
                 else:
                     bride = self
                     groom = potential_mate
-                #print(bride.name + ' married ' + groom.name + '!!!')
+                #print(bride.name + ' (' + str(bride.age) + ') married ' + \
+                #      groom.name + ' (' + str(groom.age) + ')!!!')
                 bride.spouse = groom
                 groom.spouse = bride
                 bride.last_name = groom.last_name
                 bride.name = bride.first_name + ' ' + bride.last_name
-#                 print('bride home_address occupants: ' + str(bride.home_address.occupants))
-#                 for person in bride.home
-                if bride.home_address != None and groom.home_address != None:
+                #print('bride home_address occupants: ' + str(bride.home_address.occupants))
+                if groom.home_address != None and bride.home_address != None:
                     #woman moves into man's house
                     bride.home_address.occupants.remove(bride)
-                    groom.home_address.occupants.append(bride)
                     bride.home_address = groom.home_address
+                    groom.home_address.occupants.append(bride)
+                    print(bride.name + ' (' + str(bride.age) + ') married ' + \
+                          groom.name + ' (' + str(groom.age) + ') and she moved to his house')
                 elif groom.home_address != None and bride.home_address == None:
                     #homeless woman moves into man's house
-                    groom.home_address.occupants.append(bride)
                     bride.home_address = groom.home_address
+                    groom.home_address.occupants.append(bride)
+                    print(bride.name + ' (' + str(bride.age) + ') married ' + \
+                          groom.name + ' (' + str(groom.age) + ') and she moved off the streets')
                 elif groom.home_address == None and bride.home_address != None:
                     #homeless man moves into woman's house
-                    bride.home_address.occupants.append(groom)
                     groom.home_address = bride.home_address
-                    
+                    bride.home_address.occupants.append(groom)
+                    print(bride.name + ' (' + str(bride.age) + ') married ' + \
+                          groom.name + ' (' + str(groom.age) + ') and he moved off the streets')
+                #else:
+                #    print(bride.name + ' ' + groom.name + ' got married in the streets')
+
+                if groom.home_address != bride.home_address:
+                    raise NameError('bride and groom didn\'t go home to the same house')
+                if groom.home_address:
+                    if groom.home_address.occupants != bride.home_address.occupants:
+                        raise NameError('occupants list not equal after wedding')
+
                 singles.remove(potential_mate)
                 break
 
@@ -155,12 +183,14 @@ class Person(object):
             economy['plow_market'].put( (self.price, id(self), self) ) #make listing
 
     def make_house(self, economy):
+        #TO DO: have carpenters and their families move into the first house they make
         for i in range( randint(1, 2) ):
             if 'house' not in self.owns:
                 self.owns['house'] = [ House() ]
             else:
                 self.owns['house'].append( House() )
-            print(self.name + ' owns ' + str(len(self.owns['house'])) + ' houses')
+            #print(self.name + ' owns ' + str(len(self.owns['house'])) + ' houses')
+        for i in range(len(self.owns['house'])-1): #so carpenters don't sell their own house
             economy['house_market'].put( (self.price, id(self), self) ) #make listing
             
     def change_job(self, economy):
@@ -204,36 +234,39 @@ class Person(object):
                 self.alive = False
 #                 print(self.name + ' starved to death 0X')
 
-    def spend(self, economy):
+    def spend(self, economy, year):
         if self.home_address == None:
-            self.buy_house(economy)
+            self.buy_house(economy, year)
         if self.job == self.farm:
             self.buy_plow(economy)
             
-    def buy_house(self, economy):
-        if 'house' not in self.owns and \
-        economy['house_market'].qsize() > 0 and \
-        self.food > economy['house_market'].queue[0][0] and \
-        len(economy['house_market'].queue[0][2].owns['house']) > 1: #so carpenters don't sell their own house
+    def buy_house(self, economy, year):
+        if economy['house_market'].qsize() > 0 and \
+        self.food > economy['house_market'].queue[0][0]:
             listing = economy['house_market'].get()
             price = listing[0]
             seller = listing[2] 
             self.food -= price 
             seller.food += price #give seller food payment
-            house = seller.owns['house'][-1] 
-            self.owns['house'] = [ House() ]
+            house = House(seller.name, year) 
+            self.owns['house'] = [ house ]
             print(self.name + ' bought a house from ' + seller.name + ' %%% %%%')
-            print(len(seller.owns['house']))
-            seller.owns['house'].remove(house)
-            print(len(seller.owns['house']))
             self.home_address = house
             self.home_address.occupants.append(self)
-            if self.spouse != None:
+            if self.spouse:
+                if self.spouse.home_address:
+                    print(self.spouse.name, self.spouse.age, self.spouse.home_address)
+                    raise NameError('the spouse (' + self.spouse.name + ') had a house and wasn\'t sharing')
+
                 self.spouse.home_address = house
                 house.occupants.append(self.spouse)
-            for child in self.children:
-                child.home_address = house
-                house.occupants.append(child)
+
+                if self.home_address != self.spouse.home_address:
+                    raise NameError('they didn\'t move in together')
+
+            #for child in self.children:
+            #    child.home_address = house
+            #    house.occupants.append(child)
     
     def buy_plow(self, economy):
         if 'plow' not in self.owns and \

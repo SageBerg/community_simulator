@@ -12,6 +12,11 @@ class Plow(Item):
         Item.__init__(self)
 
 class House(Item):
-    def __init__(self):
+    def __init__(self, creator='Johnson-Berg', year=0):
         Item.__init__(self)
         self.occupants = list()
+        self.creator = creator #person.name
+        self.year = year
+
+    def __str__(self):
+        return 'House ' + self.creator + ' year: ' + str(self.year) 

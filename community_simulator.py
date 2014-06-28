@@ -23,7 +23,7 @@ house_list = list()
 def main():
     global house_list
 
-    for i in range(1000):
+    for i in range(20):
         person_list.append(Person())
     for person in person_list:
         person.age = 10
@@ -36,28 +36,31 @@ def main():
 
     famine_flag = False
     for i in range(201):  #the number of years
+        print()
+        print('----- year ' + str(i) + ' -----') 
+        print('there are ' + str(len(person_list)) + ' people alive')
+        print('there are ' + str(len(house_list))  + ' houses standing') 
+        print()
         plague(person_list)
         if famine_flag == False:
             famine_flag = famine(person_list)
 #        global_decay()
-        house_list = update_house_list() #adds new houses
         death()             #kills and removes people from lists
         destruction()       #decays and removes items
+        house_list = update_house_list() #adds new houses
         age()               #increments everyone's age
         birth()
         search_for_spouse()
         work()
         eat()
-        spend()
+        spend(i) #might want to move eat() to end since it kills people sometimes
         house_search()
-        child_search()
+        #child_search()
+        #spouse_search()
         #change_prices()     #prices change based on demand
         if famine_flag: 
             famine_flag = end_famine_maybe(person_list)
-        print()
-        print('year ' + str(i)) 
-        print('there are ' + str(len(person_list)) + ' people alive')
-        print('there are ' + str(len(house_list))  + ' houses standing') 
+    
     for person in person_list:
         if person.last_name in family:
             family[person.last_name] += 1
@@ -101,7 +104,18 @@ def main():
             #print("MORALITY: " + str(person.morality))
             print()
 
-def child_search():
+def spouse_search(): #DEBUG function
+    for person in person_list:
+        if person.spouse != None and person.spouse.spouse != person:
+            print()
+            print('person: ' + person.name, str(person.alive))
+            print('spouse: ' + person.spouse.name, str(person.spouse.alive))
+            print('spouse of spouse: ' + person.spouse.spouse.name, str(person.spouse.spouse.alive))
+            raise NameError(person.name + ' has marraige problems')
+        elif person.spouse != None:
+            print(person.name + ' and ' + person.spouse.name + ' have a fine marriage')
+
+def child_search(): #DEBUG function
     for person in person_list:
         try:
             if person not in person.mother.children:
@@ -116,36 +130,37 @@ def child_search():
 
 def house_search(): #DEBUG function
     for house in house_list:
+        #print(house, 'Durability:', house.durability)
         for occupant in house.occupants:
             if occupant.home_address != house:
-                raise NameError(occupant.name + ' has a different home address')
+                print()
+                print('HOUSE ERROR')
+                print(occupant.home_address, 'Durability:', occupant.home_address.durability)
+                print(house, 'Durability:', house.durability)
+                print(occupant.name + ' is an occupant of ' + str(occupant.home_address))
+                if occupant.spouse:
+                    print(occupant.spouse.name + ' is an occupant of ' + str(occupant.spouse.home_address))
+                raise NameError(occupant.name + ' (' + str(occupant.age) + \
+                ') has address ' + str(occupant.home_address)) 
     for person in person_list:
         if person.home_address != None and person not in person.home_address.occupants:
             print()
             print("OCCUPANTS: ")
             for oc in person.home_address.occupants:
-                print(oc.name)
+                try:
+                    print(oc.name, oc.age, oc.spouse.name, oc.spouse.age)
+                except:
+                    pass
             raise NameError(person.name + ' Age: (' + str(person.age) + \
             ') is not in occupants list')
     
-def update_house_list():
-    new_house_list = list()
-    for person in person_list:
-        if person.home_address != None and person.home_address not in new_house_list:
-            new_house_list.append(person.home_address)
-    return new_house_list
-
 def decay(item):
     item.durability -= randint(0,5)
-
-#def global_decay(): #calls decay on lists of items
-#    global house_list
-#    for house in house_list:
-#        decay(house)
 
 def destruction():
     for person in person_list: #people leave destroyed homes
         if person.home_address != None and person.home_address.durability <= 0:
+            person.home_address.occupants.remove(person)
             person.home_address = None
         
     item_set = set()
@@ -156,13 +171,17 @@ def destruction():
                     print(str(item) + ' is shared by ' + person.name)
                     raise NameError('two people own the same item')
                 item_set.add(item)
-                #print(type(item))
-                #print(person.name)
-                #print(item)
                 decay(item)
                 if item.durability <= 0:
             	    item_list.remove(item) 
-            	    print(person.name + '\'s' + str(type(item)) + ' broke')
+            	    #print(person.name + '\'s ' + str(type(item)) + ' broke')
+
+def update_house_list():
+    new_house_list = list()
+    for person in person_list:
+        if person.home_address != None and person.home_address not in new_house_list:
+            new_house_list.append(person.home_address)
+    return new_house_list
 
 def update_market(market):
     new_market = PriorityQueue()
@@ -223,6 +242,7 @@ def death():
         #print(house.occupants)
         for person in house.occupants:
             if person.alive == False:
+                person.home_address = None #is this necessary?
                 house.occupants.remove(person)
         
 def age():
@@ -246,8 +266,8 @@ def search_for_spouse():
             else:
                 single_female_set.add(person)
                 #print(person.name + ' ' + str( person.age ) + ' is looking for a husband!!!')
-    single_male_set   = {male for male in single_male_set if male.alive}
-    single_female_set = {female for female in single_female_set if female.alive}
+    single_male_set   = {male   for male   in single_male_set   if male.alive   and male.spouse   == None}
+    single_female_set = {female for female in single_female_set if female.alive and female.spouse == None}
     #print("          single male length: " + str(len(single_male_set)))
     for male in single_male_set:
         male.marriage(single_female_set)
@@ -268,8 +288,8 @@ def eat():
     for person in person_list:
         person.eat()
 
-def spend():
+def spend(year):
     for person in person_list:
-        person.spend(economy)
+        person.spend(economy, year)
     
 main()
