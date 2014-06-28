@@ -21,6 +21,8 @@ economy['house_market'] = PriorityQueue()
 house_list = list()
 
 def main():
+    global house_list
+
     for i in range(1000):
         person_list.append(Person())
     for person in person_list:
@@ -33,23 +35,29 @@ def main():
         house_list.append(house)
 
     famine_flag = False
-    for i in range(200):  #the number of years
+    for i in range(201):  #the number of years
         plague(person_list)
         if famine_flag == False:
             famine_flag = famine(person_list)
-        global_decay()
-        destruction()
-        death()
-        age()
+#        global_decay()
+        house_list = update_house_list() #adds new houses
+        death()             #kills and removes people from lists
+        destruction()       #decays and removes items
+        age()               #increments everyone's age
         birth()
-        marriage()
+        search_for_spouse()
         work()
         eat()
+        spend()
+        house_search()
+        child_search()
+        #change_prices()     #prices change based on demand
         if famine_flag: 
             famine_flag = end_famine_maybe(person_list)
+        print()
         print('year ' + str(i)) 
         print('there are ' + str(len(person_list)) + ' people alive')
-    
+        print('there are ' + str(len(house_list))  + ' houses standing') 
     for person in person_list:
         if person.last_name in family:
             family[person.last_name] += 1
@@ -58,6 +66,7 @@ def main():
         #print(person.name + '(' + str(person.age) + ') still lives.')
         #print_fathers(person)
         #print()
+    print()
     for name in family:
         print(name, family[name])
     print(len(person_list))
@@ -65,59 +74,153 @@ def main():
     for person in person_list:
         s += len(person.children)
     print('average children: ' + str(round(s/(len(person_list)+1), 2)))
+
     farmers = 0
     plowrights = 0
+    carpenters = 0
     for person in person_list:
         if person.job == person.farm:
             farmers += 1
+        elif person.job == person.make_house:
+            carpenters += 1
         else:
             plowrights += 1
-    print('number of farmers: ' + str(farmers))
+    print('number of farmers: '    + str(farmers))
     print('number of plowrights: ' + str(plowrights))
-  #   for house in house_list:
-#         print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
-#         for person in house.occupants:
-#             print(person.name + ' age: ' + str(person.age))
-#             print("MORALITY: " + str(person.morality))
+    print('number of carpenters: ' + str(carpenters))
+   
+    homeless = 0
+    for person in person_list:
+        if person.home_address == None:
+            homeless += 1
+    print('number of homeless: ' + str(homeless))
+    for house in house_list:
+        print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
+        for person in house.occupants:
+            print(person.name + ' age: ' + str(person.age), end=', ')
+            #print("MORALITY: " + str(person.morality))
+            print()
+
+def child_search():
+    for person in person_list:
+        try:
+            if person not in person.mother.children:
+                raise NameError(person.name + ' Age: (' + str(person.age) + \
+                ') is not in mother children list')
+            if person not in person.father.children:
+                raise NameError(person.name + ' Age: (' + str(person.age) + \
+                ') is not in father children list')
+        except:
+            pass
+            #initial people do not have parents 
+
+def house_search(): #DEBUG function
+    for house in house_list:
+        for occupant in house.occupants:
+            if occupant.home_address != house:
+                raise NameError(occupant.name + ' has a different home address')
+    for person in person_list:
+        if person.home_address != None and person not in person.home_address.occupants:
+            print()
+            print("OCCUPANTS: ")
+            for oc in person.home_address.occupants:
+                print(oc.name)
+            raise NameError(person.name + ' Age: (' + str(person.age) + \
+            ') is not in occupants list')
+    
+def update_house_list():
+    new_house_list = list()
+    for person in person_list:
+        if person.home_address != None and person.home_address not in new_house_list:
+            new_house_list.append(person.home_address)
+    return new_house_list
 
 def decay(item):
     item.durability -= randint(0,5)
 
-def global_decay(): #calls decay on lists of items
-    global house_list
-    for house in house_list:
-        decay(house)
+#def global_decay(): #calls decay on lists of items
+#    global house_list
+#    for house in house_list:
+#        decay(house)
 
 def destruction():
-    global house_list
-    for house in house_list:
-        if house.durability <= 0:
-            house_list.remove(house)
-            #print('a house fell victim to time and neglect')
-            # for person in house.occupants:
-#                 print(person.name)
-    for person in person_list:
+    for person in person_list: #people leave destroyed homes
+        if person.home_address != None and person.home_address.durability <= 0:
+            person.home_address = None
+        
+    item_set = set()
+    for person in person_list: #removes items that break
         for item_list in person.owns.values():
             for item in item_list:
-            	if item.durability <= 0:
+                if item in item_set:
+                    print(str(item) + ' is shared by ' + person.name)
+                    raise NameError('two people own the same item')
+                item_set.add(item)
+                #print(type(item))
+                #print(person.name)
+                #print(item)
+                decay(item)
+                if item.durability <= 0:
             	    item_list.remove(item) 
-            	    #print(person.name + '\'s house blew up!!!!!!!!!!!!!')
-            
+            	    print(person.name + '\'s' + str(type(item)) + ' broke')
+
+def update_market(market):
+    new_market = PriorityQueue()
+    for i in range(economy[market].qsize()):
+        listing = economy[market].get()
+        seller = listing[2]
+        if seller.alive:
+            new_market.put(listing)
+    economy[market] = new_market
+
 def death():
     global house_list
     global economy
     for person in person_list:
         person.death_chance()
         if person.alive == False:
-            #print(person.name + ' died at age: ' + str(person.age))
+
             person_list.remove(person)
-    new_plow_market = PriorityQueue()
-    for i in range(economy['plow_market'].qsize()):
-        seller = economy['plow_market'].get()
-        if seller[2].alive:
-            new_plow_market.put(seller)
-    economy['plow_market'] = new_plow_market
+
+            if person.spouse != None:
+                for key in person.owns.keys():
+                    if key not in person.spouse.owns:
+                        person.spouse.owns[key] = person.owns[key]
+                    else:
+                        person.spouse.owns[key] += person.owns[key]
+                #if person.gender == 'female':
+                #    print(person.name + ' died and left her items to her husband ' + person.spouse.name)
+                #else:
+                #    print(person.name + ' died and left his items to his wife ' + person.spouse.name)
+            elif len(person.children) > 0:
+                for key in person.owns.keys():
+                    if key not in person.children[0].owns:
+                        person.children[0].owns[key] = person.owns[key]
+                    else:
+                        person.children[0].owns[key] += person.owns[key]
+                    #print(person.children[0].name + ' inherited ' + str(len(person.owns[key])) + ' ' + key + 's')
+                    #print(person.owns)
+                    #print(person.children[0].owns)
+                #raise NameError('child inherited stuff')
+            else:
+                pass
+                #print('no one was alive to inhereit ' + person.name + '\'s items')
+            try:
+                person.mother.children.remove(person)
+                person.father.children.remove(person)
+            except:
+                #print('initial people don\'t have parents') 
+                pass
+            #print(person.name + ' died at age: ' + str(person.age))
+
+            if person.spouse != None:
+                person.spouse.spouse = None #people can't be married to dead people
+
+    update_market('plow_market')
+    update_market('house_market')
+
     for house in house_list: #remove dead people from houses
+        #print(house.occupants)
         for person in house.occupants:
             if person.alive == False:
                 house.occupants.remove(person)
@@ -133,7 +236,7 @@ def birth():
             person_list.append(baby)
             #print(baby.name + ' was born to ' + person.name + '!')
 
-def marriage():
+def search_for_spouse():
     global single_male_set
     global single_female_set
     for person in person_list:
@@ -142,15 +245,16 @@ def marriage():
                 single_male_set.add(person)
             else:
                 single_female_set.add(person)
-    single_male_set = {male for male in single_male_set if male.alive}
+                #print(person.name + ' ' + str( person.age ) + ' is looking for a husband!!!')
+    single_male_set   = {male for male in single_male_set if male.alive}
     single_female_set = {female for female in single_female_set if female.alive}
     #print("          single male length: " + str(len(single_male_set)))
     for male in single_male_set:
-        male.search_for_spouse(single_female_set)
+        male.marriage(single_female_set)
         #print("               " + male.name)
     #print("          single female length: " + str(len(single_female_set)))
-    for female in single_female_set:
-        female.search_for_spouse(single_male_set)
+    #for female in single_female_set:
+    #    female.marraige(single_male_set) #weird error female has no attribute marriage
         #print("               " + female.name)
 
 def work():
@@ -163,5 +267,9 @@ def work():
 def eat():
     for person in person_list:
         person.eat()
+
+def spend():
+    for person in person_list:
+        person.spend(economy)
     
 main()

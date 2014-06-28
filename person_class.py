@@ -20,77 +20,73 @@ class Person(object):
     def last_name_gen():
         return choice(last_list)
         
-    market_job_dict = {
-    'plow_market': make_plow,
-    'house_market': make_house,
-    }
-
     def __init__(self):
-        self.gender = self.gender_gen()
+        self.gender     = self.gender_gen()
         self.first_name = self.first_name_gen() 
-        self.last_name = Person.last_name_gen() 
-        self.name = self.first_name + ' ' + self.last_name
-        self.age = 0
+        self.last_name  = Person.last_name_gen() 
+        self.name       = self.first_name + ' ' + self.last_name
+        self.age        = 0
         
         #RELATIONS
         #self.relation_to_authority
         #self.relations
         #self.boss
         #self.servants
-        self.spouse = None
+        self.mother   = None
+        self.father   = None
+        self.spouse   = None
         self.children = list()
-        self.mother = None
-        self.father = None
 
         #passive traits
         self.alive = True
-        self.pride = None
-        self.morality = None
+
+        self.pride        = None
+        self.morality     = None
         self.intelligence = None
         self.extravagance = None
-        self.creativity = None
-        self.pride = self.attribute_gen(self.pride)
-        self.morality = self.attribute_gen(self.morality)
+        self.creativity   = None
+        self.pride        = self.attribute_gen(self.pride)
+        self.morality     = self.attribute_gen(self.morality)
         self.intelligence = self.attribute_gen(self.intelligence)
         self.extravagance = self.attribute_gen(self.extravagance)
-        self.creativity = self.attribute_gen(self.creativity)
+        self.creativity   = self.attribute_gen(self.creativity)
 
         #skills
         self.job = self.farm #self.job = function
         self.price = self.set_price() 
-        #self.persuasion
         self.farm_skill = 5 
-        #self.parenting
         #self.fight
+        #self.persuasion
+        #self.parenting
        
         #OWNERSHIP
-        self.food = 0
+        self.food = 0 #food is used as currency for now
         self.home_address = None
-        #self.wealth = 0
         self.owns = dict() 
+        #self.wealth = 0
         
+    def gender_gen(self):
+        return choice(['female', 'male'])        
+         
+    def first_name_gen(self): 
+        if self.gender == 'female':
+           return choice(female_first_list)
+        return choice(male_first_list)
 
-    def death_chance(self): #death from old age and sickness
-        if randint(0,100) <= death_dict[self.age]*100:
-            if len(self.children) > 0:
-                for key in self.owns.keys():
-                    if key not in self.children[0].owns:
-                        self.children[0].owns[key] = self.owns[key]
-                    else:
-                        self.children[0].owns[key] += self.owns[key]
-#                     if self.job == self.make_plow:
-#                         try:
-#                             print('plowright ' + self.name + ' died and left ' + \
-#                             str(len(self.owns['plow'])) + ' plow(s) to the heir ' + self.children[0].name)
-#                         except:
-#                             print('plowright died with no plows')
-#                     print(self.children[0].name + ' inherited ' + str(len(self.owns[key])) + ' ' + key + 's')
-            try:
-                self.mother.children.remove(self)
-                self.father.children.remove(self)
-            except:
-                #print('initial people don\'t have parents') 
-                pass
+    def attribute_gen(self, attribute):
+        stat = 0
+        if self.mother != None:
+            stat += round((self.mother.attribute + self.father.attribute) / 2, 0)
+        for i in range(10):
+            stat += randint(-10, 10)
+        return stat
+
+    def set_price(self):
+        return len(self.children) + randint(1,10) 
+        #people try to make enough to feed their children
+
+    def death_chance(self): #death from old age, sickness, and accidents
+        if randint(0,100) <= death_dict[self.age]*100: 
             self.alive = False
 
     def give_birth_chance(self):
@@ -104,12 +100,13 @@ class Person(object):
                 baby.last_name = self.last_name
                 baby.name = baby.first_name + ' ' + baby.last_name
                 baby.home_address = self.home_address
-                self.home_address.occupants.append(baby)
+                if self.home_address != None:
+                    self.home_address.occupants.append(baby)
                 #print(baby.name + " was born to " + self.name + " and " + self.spouse.name)
                 return baby
     
-    def search_for_spouse(self, singles):
-        for potential_mate in (singles):
+    def marriage(self, singles):
+        for potential_mate in singles:
             #print(self.name + ' is looking for love')
             #print(len(singles))
             if potential_mate.last_name != self.last_name:
@@ -126,26 +123,68 @@ class Person(object):
                 bride.name = bride.first_name + ' ' + bride.last_name
 #                 print('bride home_address occupants: ' + str(bride.home_address.occupants))
 #                 for person in bride.home
-                bride.home_address.occupants.remove(bride)
-                bride.home_address = groom.home_address
-                groom.home_address.occupants.append(bride)
+                if bride.home_address != None and groom.home_address != None:
+                    #woman moves into man's house
+                    bride.home_address.occupants.remove(bride)
+                    groom.home_address.occupants.append(bride)
+                    bride.home_address = groom.home_address
+                elif groom.home_address != None and bride.home_address == None:
+                    #homeless woman moves into man's house
+                    groom.home_address.occupants.append(bride)
+                    bride.home_address = groom.home_address
+                elif groom.home_address == None and bride.home_address != None:
+                    #homeless man moves into woman's house
+                    bride.home_address.occupants.append(groom)
+                    groom.home_address = bride.home_address
+                    
                 singles.remove(potential_mate)
-                return
-
-    def gender_gen(self):
-        return choice(['female', 'male'])        
-         
-    def first_name_gen(self): 
-        if self.gender == 'female':
-           return choice(female_first_list)
-        return choice(male_first_list)
+                break
 
     def farm(self, economy):
         production = self.farm_skill
         if 'plow' in self.owns:
             production += randint(0, 4)
         self.food += randint(0, production)
-        self.buy_plow(economy)
+
+    def make_plow(self, economy):
+        for i in range( randint(1, 2) ):
+            if 'plow' not in self.owns:
+                self.owns['plow'] = [ Plow() ]
+            else:
+                self.owns['plow'].append( Plow() )
+            economy['plow_market'].put( (self.price, id(self), self) ) #make listing
+
+    def make_house(self, economy):
+        for i in range( randint(1, 2) ):
+            if 'house' not in self.owns:
+                self.owns['house'] = [ House() ]
+            else:
+                self.owns['house'].append( House() )
+            print(self.name + ' owns ' + str(len(self.owns['house'])) + ' houses')
+            economy['house_market'].put( (self.price, id(self), self) ) #make listing
+            
+    def change_job(self, economy):
+        '''economy is a dictionary mapping "market" strings to priority queues
+           returns a self.job function which is assigned to self in community_simulator.py
+        '''
+        market_job_dict = {
+        'plow_market':  self.make_plow,
+        'house_market': self.make_house,
+        }
+       
+        rand_job_list = list()
+        for market in economy.keys():
+            rand_job_list.append(market) 
+        shuffle(rand_job_list)
+        for market in rand_job_list:
+            if economy[market].empty(): #at least one person will always try each job
+                print(self.name + ' started a ' + market + '. Price: ' + str(self.price))
+                return market_job_dict[market]
+            elif economy[market].queue[0][0] > self.price:
+                print(self.name + ' joined the ' + market)
+                return market_job_dict[market]
+        #print(self.name + ' BECAME a farmer')
+        return self.farm #people farm if they don't have other good options
 
     def eat(self):
         if self.age < 10:
@@ -165,49 +204,51 @@ class Person(object):
                 self.alive = False
 #                 print(self.name + ' starved to death 0X')
 
-    def own_plow(self, plow = Plow()): #gives self plow
-        if 'plow' in self.owns:
-            self.owns['plow'].append( plow )
-        else:
-            self.owns['plow'] = [ plow ]
+    def spend(self, economy):
+        if self.home_address == None:
+            self.buy_house(economy)
+        if self.job == self.farm:
+            self.buy_plow(economy)
+            
+    def buy_house(self, economy):
+        if 'house' not in self.owns and \
+        economy['house_market'].qsize() > 0 and \
+        self.food > economy['house_market'].queue[0][0] and \
+        len(economy['house_market'].queue[0][2].owns['house']) > 1: #so carpenters don't sell their own house
+            listing = economy['house_market'].get()
+            price = listing[0]
+            seller = listing[2] 
+            self.food -= price 
+            seller.food += price #give seller food payment
+            house = seller.owns['house'][-1] 
+            self.owns['house'] = [ House() ]
+            print(self.name + ' bought a house from ' + seller.name + ' %%% %%%')
+            print(len(seller.owns['house']))
+            seller.owns['house'].remove(house)
+            print(len(seller.owns['house']))
+            self.home_address = house
+            self.home_address.occupants.append(self)
+            if self.spouse != None:
+                self.spouse.home_address = house
+                house.occupants.append(self.spouse)
+            for child in self.children:
+                child.home_address = house
+                house.occupants.append(child)
     
     def buy_plow(self, economy):
-        if self.food > economy['plow_market'].queue[0][0] and 'plow' not in self.owns:
+        if 'plow' not in self.owns and \
+        economy['plow_market'].qsize() > 0 and \
+        self.food > economy['plow_market'].queue[0][0] and \
+        len(economy['plow_market'].queue[0][2].owns['plow']) > 0:
             listing = economy['plow_market'].get()
-            self.food -= listing[0] #the price 
-            listing[2].food += listing[0] #give seller food payment
-            self.own_plow(listing[2].owns['plow'][-1])
-            listing[2].owns['plow'].remove(listing[2].owns['plow'][-1])
-           # print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            price  = listing[0]
+            seller = listing[2]
+            self.food -= price 
+            seller.food += price 
+            self.owns['plow'] = [ Plow() ] #uncommon index error to FIX
+            seller.owns['plow'].remove(seller.owns['plow'][-1])
+            #print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             
-    def make_plow(self, economy):
-        for i in range( randint(1, 2) ):
-            self.own_plow()
-            economy['plow_market'].put( (self.price, id(self), self) )  #make listing
-        
-    def change_job(self, economy):
-        '''economy is a dictionary mapping "market" strings to priority queues
-        '''
-        for market in economy.keys():
-            if economy[market].empty(): #at least one person will always try each job
-#                print(self.name + ' started a ' + market + '. Price: ' + str(self.price))
-                return market_job_dict[market]
-            elif economy[market].queue[0][0] > 5:
-#                print(self.name + ' joined the plow market.')
-                return market_job_dict[market]
-            
-    def set_price(self):
-        return randint(3,10)
-        
-    def attribute_gen(self, attribute):
-        stat = 0
-        if self.mother != None:
-            stat += round((self.mother.attribute + self.father.attribute) / 2, 0)
-        for i in range(10):
-            stat += randint(-10, 10)
-        return stat
-        
-
 def print_fathers(person):
     while person:
         print(person.name)
