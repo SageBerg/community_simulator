@@ -19,4 +19,7 @@ class House(Item):
         self.year = year
 
     def __str__(self):
-        return 'House ' + self.creator + ' year: ' + str(self.year) 
+        return 'House created by: ' + self.creator + \
+        ' in year: ' + str(self.year) + \
+        ' Durability: ' + str(self.durability) + \
+        ' Occupants: ' + str(len(self.occupants))

@@ -18,7 +18,7 @@ def plague(person_list):
                 person.alive = False
 
 def famine(person_list):
-    if randint(0,100) == 0:
+    if randint(0, 100) == 0:
         print('A FAMINE HAS STRUCK THE LAND............................')
         for person in person_list:
             person.farm_skill -= 5
@@ -26,7 +26,7 @@ def famine(person_list):
     return False # if there isn't a famine
 
 def end_famine_maybe(person_list):
-    if randint(0,2) == 1:
+    if randint(0,2) == 0:
         print('THE FAMINE HAS ENDED')
         for person in person_list:
             person.farm_skill += 5

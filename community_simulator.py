@@ -6,10 +6,10 @@ Sage Berg, Erica Johnson, Skyler Berg
 Created 25 May  2014
 '''
 
+from queue        import PriorityQueue
 from person_class import Person, print_fathers
-from disasters import *
-from queue import PriorityQueue
-from items import *
+from disasters    import *
+from items        import *
 
 person_list = list()
 single_male_set = set()
@@ -23,10 +23,10 @@ house_list = list()
 def main():
     global house_list
 
-    for i in range(20):
+    for i in range(1000): #number of people
         person_list.append(Person())
     for person in person_list:
-        person.age = 10
+        person.age  = 10
         person.food = 5
         house = House()
         person.owns['house'] = [ house ]
@@ -35,7 +35,7 @@ def main():
         house_list.append(house)
 
     famine_flag = False
-    for i in range(201):  #the number of years
+    for i in range(201):  #number of years
         print()
         print('----- year ' + str(i) + ' -----') 
         print('there are ' + str(len(person_list)) + ' people alive')
@@ -52,12 +52,17 @@ def main():
         birth()
         search_for_spouse()
         work()
-        eat()
-        spend(i) #might want to move eat() to end since it kills people sometimes
-        house_search()
+        spouse_house_check()
+        spend(i) 
+
+        #house_search()
         #child_search()
         #spouse_search()
-        #change_prices()     #prices change based on demand
+
+        set_prices()     #prices change based on demand
+
+        eat()
+
         if famine_flag: 
             famine_flag = end_famine_maybe(person_list)
     
@@ -72,11 +77,11 @@ def main():
     print()
     for name in family:
         print(name, family[name])
-    print(len(person_list))
     s = 0
     for person in person_list:
         s += len(person.children)
-    print('average children: ' + str(round(s/(len(person_list)+1), 2)))
+    print('average children per family: ' + str(round(s/(len(person_list)//2 +1), 2)))
+    #+1 to the divisor to avoid division by 0
 
     farmers = 0
     plowrights = 0
@@ -97,12 +102,27 @@ def main():
         if person.home_address == None:
             homeless += 1
     print('number of homeless: ' + str(homeless))
-    for house in house_list:
-        print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
-        for person in house.occupants:
-            print(person.name + ' age: ' + str(person.age), end=', ')
-            #print("MORALITY: " + str(person.morality))
-            print()
+
+    #for house in house_list:
+    #    print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
+    #    for person in house.occupants:
+    #        print(person.name + ' age: ' + str(person.age), end=', ')
+    #        #print("MORALITY: " + str(person.morality))
+    #        print()
+
+def spouse_house_check(): #DEBUG function
+    for person in person_list:
+        if person.spouse:
+            if person.spouse.home_address != person.home_address:
+                print()
+                print(person)
+                print(person.spouse)
+                raise NameError('housing mismatch')
+            if person.home_address:
+                if person.spouse.home_address.occupants != person.home_address.occupants:
+                    print(person)
+                    print(person.spouse)
+                    raise NameError('housing mismatch in occupants')
 
 def spouse_search(): #DEBUG function
     for person in person_list:
@@ -113,7 +133,8 @@ def spouse_search(): #DEBUG function
             print('spouse of spouse: ' + person.spouse.spouse.name, str(person.spouse.spouse.alive))
             raise NameError(person.name + ' has marraige problems')
         elif person.spouse != None:
-            print(person.name + ' and ' + person.spouse.name + ' have a fine marriage')
+            #print(person.name + ' and ' + person.spouse.name + ' have a fine marriage')
+            pass
 
 def child_search(): #DEBUG function
     for person in person_list:
@@ -146,11 +167,7 @@ def house_search(): #DEBUG function
         if person.home_address != None and person not in person.home_address.occupants:
             print()
             print("OCCUPANTS: ")
-            for oc in person.home_address.occupants:
-                try:
-                    print(oc.name, oc.age, oc.spouse.name, oc.spouse.age)
-                except:
-                    pass
+            print(person)
             raise NameError(person.name + ' Age: (' + str(person.age) + \
             ') is not in occupants list')
     
@@ -232,19 +249,20 @@ def death():
                 pass
             #print(person.name + ' died at age: ' + str(person.age))
 
-            if person.spouse != None:
+            if person.spouse:
                 person.spouse.spouse = None #people can't be married to dead people
-
+            person.spouse = None  
+            
     update_market('plow_market')
     update_market('house_market')
 
     for house in house_list: #remove dead people from houses
         #print(house.occupants)
         for person in house.occupants:
-            if person.alive == False:
-                person.home_address = None #is this necessary?
-                house.occupants.remove(person)
-        
+            if person.alive == False: #causing errors I don't fully understand
+                #person.home_address = None 
+                #house.occupants.remove(person)
+                pass 
 def age():
     for person in person_list:
         person.age += 1
@@ -291,5 +309,9 @@ def eat():
 def spend(year):
     for person in person_list:
         person.spend(economy, year)
+
+def set_prices():
+    for person in person_list:
+        person.set_price()
     
 main()
