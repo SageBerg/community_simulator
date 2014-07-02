@@ -272,7 +272,6 @@ def birth():
         baby = person.give_birth_chance()
         if baby:
             person_list.append(baby)
-            #print(baby.name + ' was born to ' + person.name + '!')
 
 def search_for_spouse():
     global single_male_set

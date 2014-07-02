@@ -43,12 +43,12 @@ class Person(object):
         self.pride        = None
         self.morality     = None
         self.intelligence = None
-        self.extravagance = None
+        self.thriftiness  = None
         self.creativity   = None
         self.pride        = self.attribute_gen(self.pride)
         self.morality     = self.attribute_gen(self.morality)
         self.intelligence = self.attribute_gen(self.intelligence)
-        self.extravagance = self.attribute_gen(self.extravagance)
+        self.thriftiness  = self.attribute_gen(self.thriftiness)
         self.creativity   = self.attribute_gen(self.creativity)
 
         #skills
@@ -223,17 +223,20 @@ class Person(object):
         #print(self.name + ' BECAME a farmer')
         return self.farm #people farm if they don't have other good options
 
-    def spend(self, economy, year):
+    def shop(self, economy):
+        while self.food > self.thriftiness:
         if self.home_address == None:
+
             if self.spouse:
                 if self.spouse.home_address:
                     print()
                     print('the offender is:')
                     print(self)
                     raise NameError('the spouse (' + self.spouse.name + ') had a house and wasn\'t sharing')
+
             self.buy_house(economy, year)
         if self.job == self.farm:
-            self.buy_plow(economy)
+            self.buy(economy)
             
     def buy_house(self, economy, year):
         if economy['house_market'].qsize() > 0 and \
@@ -275,7 +278,46 @@ class Person(object):
             self.owns['plow'] = [ Plow() ] #uncommon index error to FIX
             #seller.owns['plow'].remove(seller.owns['plow'][-1])
             #print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-            
+   
+    def buy(self, item, economy):
+        if economy[item].sqize() > 0:
+            listing = economy[item].get()
+            price   = listing[0]
+            seller  = listing[2]
+            self.food   -= price
+            seller.food += price 
+            if item not in self.owns:
+                self.owns[item] = [ item() ]
+            else:
+                self.owns[item].append( item() )
+            seller.listings[item] -= 1
+            print(self.name + ' bought a(n) ' + str(item) + ' from ' seller.name + '. Price: ' + str(price))
+
+    def move_family_into_house(self):
+        '''
+        should be the only code that gets people into houses
+        this way occupancy rules are all in one place
+        NOTE: self.owns[House] should only ever map to one House object
+        '''
+        if self.owns[House] and self.home_address == None:
+            self.home_address = self.owns[House]
+            self.home_address.occupants.append(self) 
+        if self.spouse and self.spouse.home_address != self.owns[House]:
+            self.move(self.spouse)
+        for child in self.children:
+            if child.home_address == None:
+                self.move(child)
+                child.move_family_into_house()
+        for parent in [ self.mother, self.father ]:
+            if parent.alive and parent.home_address == None:
+                self.move(parent)
+                parent.move_family_into_house()
+
+    def move(self, person):
+        person.home_address = self.home_address 
+        self.home_address.occupants.append(person) 
+        print(person.name + ' moved into ' + self.name + '\'s house')
+    
     def eat(self):
         if self.age < 10:
             if self.father.food > 0:
