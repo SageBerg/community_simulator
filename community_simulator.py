@@ -42,7 +42,7 @@ def main():
         print()
         print('----- year ' + str(i) + ' -----') 
         print('there are ' + str(len(person_list)) + ' people alive')
-        print('there are ' + str(len(house_list))  + ' houses standing') 
+        #print('there are ' + str(len(house_list))  + ' houses standing') 
         print()
         plague(person_list)
         if famine_flag == False:
