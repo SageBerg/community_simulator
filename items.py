@@ -10,6 +10,9 @@ from item_superclass import Item
 class Plow(Item):
     def __init__(self):
         Item.__init__(self)
+    
+    def __str__(self):
+        return 'plow'
 
 class House(Item):
     def __init__(self, creator='Johnson-Berg', year=0):
