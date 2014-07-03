@@ -52,7 +52,7 @@ class Person(object):
         self.creativity   = self.attribute_gen(self.creativity)
 
         #skills
-        self.job = self.farm #self.job = function
+        self.job   = self.farm #self.job = function
         self.price = randint(5,9) 
         self.farm_skill = 5 
         #self.fight
@@ -60,12 +60,11 @@ class Person(object):
         #self.parenting
        
         #OWNERSHIP
-        self.food = 0 #food is used as currency for now
+        self.food         = 0 #food is used as currency for now
         self.home_address = None
-        self.owns = dict() 
-        self.plow_listings  = 0
-        self.house_listings = 0
-        #self.wealth = 0
+        self.owns         = dict() 
+        self.listings     = dict() 
+        #self.wealth      = 0
 
     def __str__(self):
         string = self.name  + ' (' + str(self.age) + ')\n' 
@@ -94,13 +93,17 @@ class Person(object):
         return stat
 
     def set_price(self):
-        if self.job == self.make_plow and self.plow_listings == 0:
+        job_market_dict = {
+        self.make_plow:  Plow, 
+        self.make_house: House,
+        }
+        if self.job != self.farm and \
+        job_market_dict[self.job] in self.listings and \
+        self.listings[job_market_dict[self.job]] == 0:
             self.price += 1
-        elif self.job == self.make_plow and self.plow_listings > 0:
-            self.price -= 1
-        if self.job == self.make_house and self.house_listings == 0:
-            self.price += 1
-        elif self.job == self.make_house and self.house_listings > 0:
+        elif self.job != self.farm and \
+        job_market_dict[self.job] in self.listings and \
+        self.listings[job_market_dict[self.job]] > 0:
             self.price -= 1
         if self.price < len(self.children) + 1:
             self.price = len(self.children) + 1
@@ -137,7 +140,10 @@ class Person(object):
     
     def marriage(self, singles):
         for potential_mate in singles:
-            if potential_mate.last_name != self.last_name:
+            if potential_mate.last_name != self.last_name and \
+               potential_mate != self.mother and \
+               potential_mate != self.father and \
+               potential_mate not in self.children:
                 if potential_mate.gender == 'female':
                     bride = potential_mate
                     groom = self
@@ -150,30 +156,11 @@ class Person(object):
                 groom.spouse = bride
                 bride.last_name = groom.last_name
                 bride.name = bride.first_name + ' ' + bride.last_name
-                #print('bride home_address occupants: ' + str(bride.home_address.occupants))
-                if groom.home_address != None and bride.home_address != None:
-                    bride.home_address.occupants.remove(bride)
-                    bride.home_address = groom.home_address
-                    groom.home_address.occupants.append(bride)
-                    #print(bride.name + ' (' + str(bride.age) + ') married ' + \
-                    #      groom.name + ' (' + str(groom.age) + ') and she moved to his house')
-                    #print()
-                elif groom.home_address != None and bride.home_address == None:
-                    bride.home_address = groom.home_address
-                    groom.home_address.occupants.append(bride)
-                    #print(bride.name + ' (' + str(bride.age) + ') married ' + \
-                    #      groom.name + ' (' + str(groom.age) + ') and she moved off the streets')
-                    #print()
-                elif groom.home_address == None and bride.home_address != None:
-                    groom.home_address = bride.home_address
-                    bride.home_address.occupants.append(groom)
-                    #print(bride.name + ' (' + str(bride.age) + ') married ' + \
-                    #      groom.name + ' (' + str(groom.age) + ') and he moved off the streets')
-                    #print()
-                else:
-                    #print(bride.name + ' ' + groom.name + ' got married in the streets')
-                    pass
+                groom.move_family_into_house()
+                bride.move_family_into_house()
 
+                assert(groom.alive and bride.alive)
+                
                 if groom.home_address != bride.home_address:
                     raise NameError('bride and groom didn\'t go home to the same house')
                 if groom.home_address:
@@ -185,28 +172,32 @@ class Person(object):
 
     def farm(self, economy):
         production = self.farm_skill
-        if 'plow' in self.owns:
+        if Plow in self.owns and len(self.owns[Plow]) > 0:
             production += randint(0, 2)
         self.food += randint(0, production)
 
     def make_plow(self, economy):
         for i in range( randint(1, 2) ):
-            economy['plow_market'].put( (self.price, id(self), self) ) #make listing
-            self.plow_listings += 1
+            self.produce(Plow, economy)
 
     def make_house(self, economy):
-        #TO DO: have carpenters and their families move into the first house they make
         for i in range(randint(1,1)):
-            economy['house_market'].put( (self.price, id(self), self) ) #make listing
-            self.house_listings += 1
-            
+            self.produce(House, economy)
+    
+    def produce(self, item, economy):
+        economy[item].put( (self.price, id(self), self) )
+        if item not in self.listings:
+            self.listings[item] = 1
+        else:
+            self.listings[item] += 1
+
     def change_job(self, economy):
         '''economy is a dictionary mapping "market" strings to priority queues
            returns a self.job function which is assigned to self in community_simulator.py
         '''
         market_job_dict = {
-        'plow_market':  self.make_plow,
-        'house_market': self.make_house,
+        Plow:  self.make_plow,
+        House: self.make_house,
         }
        
         rand_job_list = list()
@@ -223,65 +214,25 @@ class Person(object):
         #print(self.name + ' BECAME a farmer')
         return self.farm #people farm if they don't have other good options
 
-    def shop(self, economy):
-        while self.food > self.thriftiness:
+    def spend(self, economy):
         if self.home_address == None:
 
             if self.spouse:
                 if self.spouse.home_address:
                     print()
-                    print('the offender is:')
                     print(self)
                     raise NameError('the spouse (' + self.spouse.name + ') had a house and wasn\'t sharing')
+            self.buy(House, economy)
+            self.move_family_into_house()
 
-            self.buy_house(economy, year)
+        #while self.food > self.thriftiness:
         if self.job == self.farm:
-            self.buy(economy)
+            self.buy(Plow, economy)
             
-    def buy_house(self, economy, year):
-        if economy['house_market'].qsize() > 0 and \
-        self.food > economy['house_market'].queue[0][0]:
-            listing = economy['house_market'].get()
-            price = listing[0]
-            seller = listing[2] 
-            self.food -= price 
-            seller.food += price #give seller food payment
-            seller.house_listings -= 1
-            house = House(seller.name, year) 
-            self.owns['house'] = [ house ]
-            #print(self.name + ' bought a house from ' + seller.name + ' %%% %%%')
-            self.home_address = house
-            self.home_address.occupants.append(self)
-
-            if self.spouse:
-                self.spouse.home_address = house
-                house.occupants.append(self.spouse)
-
-                if self.home_address != self.spouse.home_address:
-                    raise NameError('they didn\'t move in together')
-
-            #for child in self.children:
-            #    child.home_address = house
-            #    house.occupants.append(child)
-    
-    def buy_plow(self, economy):
-        if 'plow' not in self.owns and \
-        economy['plow_market'].qsize() > 0 and \
-        self.food > economy['plow_market'].queue[0][0] and \
-        economy['plow_market'].queue[0][2].plow_listings > 0:
-            listing = economy['plow_market'].get()
-            price  = listing[0]
-            seller = listing[2]
-            self.food -= price 
-            seller.food += price 
-            seller.house_listings -= 1
-            self.owns['plow'] = [ Plow() ] #uncommon index error to FIX
-            #seller.owns['plow'].remove(seller.owns['plow'][-1])
-            #print(self.name + ' bought a plow!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-   
     def buy(self, item, economy):
-        if economy[item].sqize() > 0:
+        if economy[item].qsize() > 0:
             listing = economy[item].get()
+            #print(listing)
             price   = listing[0]
             seller  = listing[2]
             self.food   -= price
@@ -291,7 +242,7 @@ class Person(object):
             else:
                 self.owns[item].append( item() )
             seller.listings[item] -= 1
-            print(self.name + ' bought a(n) ' + str(item) + ' from ' seller.name + '. Price: ' + str(price))
+            print(self.name + ' bought a(n) ' + str(item) + ' from ' + seller.name + '. Price: ' + str(price))
 
     def move_family_into_house(self):
         '''
@@ -299,24 +250,28 @@ class Person(object):
         this way occupancy rules are all in one place
         NOTE: self.owns[House] should only ever map to one House object
         '''
-        if self.owns[House] and self.home_address == None:
-            self.home_address = self.owns[House]
+        if House in self.owns and len(self.owns[House]) > 0 and self.home_address == None:
+            self.home_address = self.owns[House][0]
             self.home_address.occupants.append(self) 
-        if self.spouse and self.spouse.home_address != self.owns[House]:
+        if self.spouse and self.spouse.home_address != self.home_address: 
+            if self.spouse.home_address != None:
+                self.spouse.home_address.occupants.remove(self.spouse)
             self.move(self.spouse)
         for child in self.children:
             if child.home_address == None:
                 self.move(child)
                 child.move_family_into_house()
         for parent in [ self.mother, self.father ]:
-            if parent.alive and parent.home_address == None:
+            if parent != None and parent.alive and parent.home_address == None:
                 self.move(parent)
-                parent.move_family_into_house()
+                if parent.spouse:
+                    self.move(parent.spouse)
 
     def move(self, person):
         person.home_address = self.home_address 
-        self.home_address.occupants.append(person) 
-        print(person.name + ' moved into ' + self.name + '\'s house')
+        if self.home_address:
+            self.home_address.occupants.append(person) 
+            #print(person.name + ' moved into ' + self.name + '\'s house')
     
     def eat(self):
         if self.age < 10:

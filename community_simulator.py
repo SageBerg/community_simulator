@@ -12,12 +12,18 @@ from disasters    import *
 from items        import *
 
 person_list = list()
-single_male_set = set()
+single_male_set   = set()
 single_female_set = set()
 family = dict()
+
 economy = dict()
-economy['plow_market'] = PriorityQueue()
-economy['house_market'] = PriorityQueue()
+economy[Plow]  = PriorityQueue()
+economy[House] = PriorityQueue()
+
+print()
+print(economy)
+print(economy[House].qsize())
+
 house_list = list()
 
 def main():
@@ -55,9 +61,9 @@ def main():
         spouse_house_check()
         spend(i) 
 
-        #house_search()
-        #child_search()
-        #spouse_search()
+        house_search()
+        child_search()
+        spouse_search()
 
         set_prices()     #prices change based on demand
 
@@ -253,8 +259,8 @@ def death():
                 person.spouse.spouse = None #people can't be married to dead people
             person.spouse = None  
             
-    update_market('plow_market')
-    update_market('house_market')
+    update_market(Plow)
+    update_market(House)
 
     for house in house_list: #remove dead people from houses
         #print(house.occupants)
@@ -307,7 +313,7 @@ def eat():
 
 def spend(year):
     for person in person_list:
-        person.spend(economy, year)
+        person.spend(economy)
 
 def set_prices():
     for person in person_list:
