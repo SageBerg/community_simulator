@@ -96,7 +96,9 @@ class Person(object):
         job_market_dict = {
         self.make_plow:  Plow, 
         self.make_house: House,
+        self.make_wine:  Wine,
         }
+
         if self.job != self.farm and \
         job_market_dict[self.job] in self.listings and \
         self.listings[job_market_dict[self.job]] == 0:
@@ -113,7 +115,7 @@ class Person(object):
             self.alive = False
         if self.home_address == None and randint(0,9):
             self.alive = False
-            #print(str(self) + 'died of exposure')
+            print(str(self) + 'died of exposure **************************')
 
     def give_birth_chance(self):
         if self.gender == 'female' and self.age > 15 and self.age <= 55 and self.spouse and self.spouse.alive:
@@ -183,6 +185,10 @@ class Person(object):
     def make_house(self, economy):
         for i in range(randint(1,1)):
             self.produce(House, economy)
+   
+    def make_wine(self, economy):
+        for i in range(randint(0,5)):
+            self.produce(Wine, economy)
     
     def produce(self, item, economy):
         economy[item].put( (self.price, id(self), self) )
@@ -198,6 +204,7 @@ class Person(object):
         market_job_dict = {
         Plow:  self.make_plow,
         House: self.make_house,
+        Wine:  self.make_wine,
         }
        
         rand_job_list = list()
@@ -209,7 +216,7 @@ class Person(object):
                 #print(self.name + ' started a ' + market + '. Price: ' + str(self.price))
                 return market_job_dict[market]
             elif economy[market].queue[0][0] > self.price:
-                #print(self.name + ' joined the ' + market)
+                #print(self.name + ' joined the ' + str(market))
                 return market_job_dict[market]
         #print(self.name + ' BECAME a farmer')
         return self.farm #people farm if they don't have other good options
@@ -228,7 +235,9 @@ class Person(object):
         #while self.food > self.thriftiness:
         if self.job == self.farm:
             self.buy(Plow, economy)
-            
+        while self.job != self.make_wine and economy[Wine].qsize() > 0 and self.food > max(self.thriftiness, economy[Wine].queue[0][0]) :
+            self.buy(Wine, economy) 
+
     def buy(self, item, economy):
         if economy[item].qsize() > 0:
             listing = economy[item].get()
@@ -242,7 +251,7 @@ class Person(object):
             else:
                 self.owns[item].append( item() )
             seller.listings[item] -= 1
-            print(self.name + ' bought a(n) ' + str(item) + ' from ' + seller.name + '. Price: ' + str(price))
+            #print(self.name + ' bought a(n) ' + str(item) + ' from ' + seller.name + '. Price: ' + str(price))
 
     def move_family_into_house(self):
         '''

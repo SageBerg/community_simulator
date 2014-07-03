@@ -19,10 +19,7 @@ family = dict()
 economy = dict()
 economy[Plow]  = PriorityQueue()
 economy[House] = PriorityQueue()
-
-print()
-print(economy)
-print(economy[House].qsize())
+economy[Wine]  = PriorityQueue()
 
 house_list = list()
 
@@ -59,7 +56,7 @@ def main():
         search_for_spouse()
         work()
         spouse_house_check()
-        spend(i) 
+        spend() 
 
         house_search()
         child_search()
@@ -89,7 +86,8 @@ def main():
     print('average children per family: ' + str(round(s/(len(person_list)//2 +1), 2)))
     #+1 to the divisor to avoid division by 0
 
-    farmers = 0
+    farmers    = 0
+    vinters    = 0
     plowrights = 0
     carpenters = 0
     for person in person_list:
@@ -97,9 +95,12 @@ def main():
             farmers += 1
         elif person.job == person.make_house:
             carpenters += 1
+        elif person.job == person.make_wine:
+            vinters += 1
         else:
             plowrights += 1
     print('number of farmers: '    + str(farmers))
+    print('number of vinters: '    + str(vinters))
     print('number of plowrights: ' + str(plowrights))
     print('number of carpenters: ' + str(carpenters))
    
@@ -188,16 +189,18 @@ def destruction():
         
     item_set = set()
     for person in person_list: #removes items that break
-        for item_list in person.owns.values():
-            for item in item_list:
-                if item in item_set:
-                    print(str(item) + ' is shared by ' + person.name)
-                    raise NameError('two people own the same item')
-                item_set.add(item)
-                decay(item)
-                if item.durability <= 0:
-            	    item_list.remove(item) 
-            	    #print(person.name + '\'s ' + str(type(item)) + ' broke')
+        if House in person.owns:
+            for item_list in person.owns[House]: 
+            #include other items later
+                for item in item_list:
+                    if item in item_set:
+                        print(str(item) + ' is shared by ' + person.name)
+                        raise NameError('two people own the same item')
+                    item_set.add(item)
+                    decay(item)
+                    if item.durability <= 0:
+                        item_list.remove(item) 
+                        print(person.name + '\'s ' + str(type(item)) + ' broke')
 
 def update_house_list():
     new_house_list = list()
@@ -311,7 +314,7 @@ def eat():
     for person in person_list:
         person.eat()
 
-def spend(year):
+def spend():
     for person in person_list:
         person.spend(economy)
 
