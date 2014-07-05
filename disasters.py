@@ -12,10 +12,13 @@ from random import *
 def plague(person_list):
     if randint(0, 100) == 0:
         death_threshold = randint(1, 50)
+        plague_death_count = 0
         for person in person_list:
             if randint(0, 100) < death_threshold:
                 print(person.name + ' died of plague 0X 0X 0X 0X 0X.')
                 person.alive = False
+                plague_death_count += 1
+        return plague_death_count
 
 def famine(person_list):
     if randint(0, 100) == 0:
@@ -39,7 +42,7 @@ def fire(house_list):
         for house in house_list:
             if randint(0, 100) < destruction_threshold:
                 house.durability = 0
-                print(str(house) + ' burned down ^^^^^^')
+                #print(str(house) + ' burned down ^^^^^^')
                 #+ u"\U0001F525")
-                for person in house.occupants:
-                    print(person.name)
+                #for person in house.occupants:
+                #    print(person.name)

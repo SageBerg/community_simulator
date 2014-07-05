@@ -16,7 +16,13 @@ person_list = list()
 single_male_set   = set()
 single_female_set = set()
 family = dict()
-#cause_of_death_dict = dict()
+
+cause_of_death_dict = dict()
+cause_of_death_dict['age/sickness'] = 0
+cause_of_death_dict['plague']       = 0
+cause_of_death_dict['starvation']   = 0
+cause_of_death_dict['exposure']     = 0
+cause_of_death_dict['child starvation']     = 0
 
 economy = dict()
 economy[Plow]  = PriorityQueue()
@@ -44,13 +50,16 @@ def main():
         print()
         print('----- year ' + str(i) + ' -----') 
         print('there are ' + str(len(person_list)) + ' people alive')
-        #print('there are ' + str(len(house_list))  + ' houses standing') 
+        print('there are ' + str(len(house_list))  + ' houses standing') 
         print()
-        plague(person_list)
+        plague_death_count = plague(person_list)
+        if plague_death_count:
+            cause_of_death_dict['plague'] += plague_death_count
         fire(house_list)
         if famine_flag == False:
             famine_flag = famine(person_list)
 #        global_decay()
+        exposure()
         death()             #kills and removes people from lists
         destruction()       #decays and removes items
         house_list = update_house_list() #adds new houses
@@ -103,16 +112,16 @@ def main():
             vinters += 1
         else:
             plowrights += 1
-    print('number of farmers: '    + str(farmers))
-    print('number of vinters: '    + str(vinters))
-    print('number of plowrights: ' + str(plowrights))
-    print('number of carpenters: ' + str(carpenters))
+    print('number of farmers: '.ljust(25)    + str(farmers))
+    print('number of vinters: '.ljust(25)    + str(vinters))
+    print('number of plowrights: '.ljust(25) + str(plowrights))
+    print('number of carpenters: '.ljust(25) + str(carpenters))
    
     homeless = 0
     for person in person_list:
         if person.home_address == None:
             homeless += 1
-    print('number of homeless: ' + str(homeless))
+    print('number of homeless: '.ljust(25) + str(homeless))
 
     #for house in house_list:
     #    print("~~~~~~~~~~~~~~~~~~~~~~~ house occupants:")
@@ -120,6 +129,10 @@ def main():
     #        print(person.name + ' age: ' + str(person.age), end=', ')
     #        #print("MORALITY: " + str(person.morality))
     #        print()
+    
+    print()
+    for key, value in cause_of_death_dict.items():
+        print(key.ljust(20), value)
 
 def decay(item):
     item.durability -= randint(0,5)
@@ -163,11 +176,14 @@ def death():
     global house_list
     global economy
     for person in person_list:
-        person.death_chance()
+        key = person.death_chance()
+        if key:
+            cause_of_death_dict[key] += 1
         if person.alive == False:
             #cause_of_death_dict['age/sickness'] += 1 
             person_list.remove(person)
 
+            #TO DO: add have listings be inheritable as well
             if person.spouse != None:
                 for key in person.owns.keys():
                     if key not in person.spouse.owns:
@@ -203,8 +219,8 @@ def death():
                 person.spouse.spouse = None #people can't be married to dead people
             person.spouse = None  
             
-    update_market(Plow)
-    update_market(House)
+    for market in economy.keys():
+        update_market(market)
 
     for house in house_list: #remove dead people from houses
         #print(house.occupants)
@@ -213,6 +229,12 @@ def death():
                 #person.home_address = None 
                 #house.occupants.remove(person)
                 pass 
+def exposure():
+    for person in person_list:
+        key = person.death_by_exposure_chance()
+        if key:
+            cause_of_death_dict[key] += 1
+
 def age():
     for person in person_list:
         person.age += 1
@@ -253,7 +275,9 @@ def work():
 
 def eat():
     for person in person_list:
-        person.eat()
+        key = person.eat()
+        if key:
+            cause_of_death_dict[key] += 1
 
 def spend():
     for person in person_list:
