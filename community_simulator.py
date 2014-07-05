@@ -11,6 +11,7 @@ from person_class import Person, print_fathers
 from disasters    import *
 from items        import *
 from error_checking_functions import *
+from death_dict  import death_dict
 
 person_list = list()
 single_male_set   = set()
@@ -204,7 +205,7 @@ def exposure():
 
 def age():
     for person in person_list:
-        person.age += 1
+        person.get_older()
         
 def birth():
     for person in person_list:

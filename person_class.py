@@ -56,7 +56,7 @@ class Person(object):
         #skills
         self.job   = self.farm #self.job = function
         self.price = randint(5,9) 
-        self.strength   = 1 - death_dict[self.age]
+        self.strength   = 1 - 10*death_dict[self.age] #make better scale for strength later
         self.farm_skill = 5 
         #self.fight = 
         #self.persuasion
@@ -112,6 +112,10 @@ class Person(object):
             self.price -= 1
         if self.price < len(self.children) + 1:
             self.price = len(self.children) + 1
+
+    def get_older(self):
+        self.age += 1
+        self.strength = 1 - death_dict[self.age]
 
     def death_chance(self): #death from old age, sickness, and accidents
         if randint(0,100) <= death_dict[self.age]*100: 
@@ -357,8 +361,8 @@ class Person(object):
                 if victim.vigilance > self.vigilance:
                     if victim.morality < 0:
                         if randint(0, 9) == 0:
-                            pass
                             #print('fight')
+                            pass
                 victim.food -= 1
                 self.food += 1
                 #print(self.name + ' stole from ' + victim.name)
