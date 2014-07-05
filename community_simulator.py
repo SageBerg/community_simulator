@@ -10,11 +10,13 @@ from queue        import PriorityQueue
 from person_class import Person, print_fathers
 from disasters    import *
 from items        import *
+from error_checking_functions import *
 
 person_list = list()
 single_male_set   = set()
 single_female_set = set()
 family = dict()
+#cause_of_death_dict = dict()
 
 economy = dict()
 economy[Plow]  = PriorityQueue()
@@ -56,13 +58,14 @@ def main():
         birth()
         search_for_spouse()
         work()
-        spouse_house_check()
+
+        #debugging functions (imported from error_checking_functions.py)
+        spouse_house_check(person_list)
+        house_search(house_list, person_list)
+        child_search(person_list)
+        spouse_search(person_list)
+
         spend() 
-
-        house_search()
-        child_search()
-        spouse_search()
-
         set_prices()     #prices change based on demand
 
         eat()
@@ -118,67 +121,6 @@ def main():
     #        #print("MORALITY: " + str(person.morality))
     #        print()
 
-def spouse_house_check(): #DEBUG function
-    for person in person_list:
-        if person.spouse:
-            if person.spouse.home_address != person.home_address:
-                print()
-                print(person)
-                print(person.spouse)
-                raise NameError('housing mismatch')
-            if person.home_address:
-                if person.spouse.home_address.occupants != person.home_address.occupants:
-                    print(person)
-                    print(person.spouse)
-                    raise NameError('housing mismatch in occupants')
-
-def spouse_search(): #DEBUG function
-    for person in person_list:
-        if person.spouse != None and person.spouse.spouse != person:
-            print()
-            print('person: ' + person.name, str(person.alive))
-            print('spouse: ' + person.spouse.name, str(person.spouse.alive))
-            print('spouse of spouse: ' + person.spouse.spouse.name, str(person.spouse.spouse.alive))
-            raise NameError(person.name + ' has marraige problems')
-        elif person.spouse != None:
-            #print(person.name + ' and ' + person.spouse.name + ' have a fine marriage')
-            pass
-
-def child_search(): #DEBUG function
-    for person in person_list:
-        try:
-            if person not in person.mother.children:
-                raise NameError(person.name + ' Age: (' + str(person.age) + \
-                ') is not in mother children list')
-            if person not in person.father.children:
-                raise NameError(person.name + ' Age: (' + str(person.age) + \
-                ') is not in father children list')
-        except:
-            pass
-            #initial people do not have parents 
-
-def house_search(): #DEBUG function
-    for house in house_list:
-        #print(house, 'Durability:', house.durability)
-        for occupant in house.occupants:
-            if occupant.home_address != house:
-                print()
-                print('HOUSE ERROR')
-                print(occupant.home_address, 'Durability:', occupant.home_address.durability)
-                print(house, 'Durability:', house.durability)
-                print(occupant.name + ' is an occupant of ' + str(occupant.home_address))
-                if occupant.spouse:
-                    print(occupant.spouse.name + ' is an occupant of ' + str(occupant.spouse.home_address))
-                raise NameError(occupant.name + ' (' + str(occupant.age) + \
-                ') has address ' + str(occupant.home_address)) 
-    for person in person_list:
-        if person.home_address != None and person not in person.home_address.occupants:
-            print()
-            print("OCCUPANTS: ")
-            print(person)
-            raise NameError(person.name + ' Age: (' + str(person.age) + \
-            ') is not in occupants list')
-    
 def decay(item):
     item.durability -= randint(0,5)
 
@@ -223,7 +165,7 @@ def death():
     for person in person_list:
         person.death_chance()
         if person.alive == False:
-
+            #cause_of_death_dict['age/sickness'] += 1 
             person_list.remove(person)
 
             if person.spouse != None:
