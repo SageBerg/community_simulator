@@ -45,6 +45,7 @@ def main():
         #print('there are ' + str(len(house_list))  + ' houses standing') 
         print()
         plague(person_list)
+        fire(house_list)
         if famine_flag == False:
             famine_flag = famine(person_list)
 #        global_decay()
@@ -189,18 +190,16 @@ def destruction():
         
     item_set = set()
     for person in person_list: #removes items that break
-        if House in person.owns:
-            for item_list in person.owns[House]: 
-            #include other items later
-                for item in item_list:
-                    if item in item_set:
-                        print(str(item) + ' is shared by ' + person.name)
-                        raise NameError('two people own the same item')
-                    item_set.add(item)
-                    decay(item)
-                    if item.durability <= 0:
-                        item_list.remove(item) 
-                        print(person.name + '\'s ' + str(type(item)) + ' broke')
+        for item_list in person.owns.values():
+            for item in item_list:
+                if item in item_set:
+                    print(str(item) + ' is shared by ' + person.name)
+                    raise NameError('two people own the same item')
+                item_set.add(item)
+                decay(item)
+                if item.durability <= 0:
+                    item_list.remove(item) 
+    #                print(person.name + '\'s ' + str(type(person.owns[House])) + ' broke')
 
 def update_house_list():
     new_house_list = list()

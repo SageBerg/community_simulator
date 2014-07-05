@@ -115,7 +115,7 @@ class Person(object):
             self.alive = False
         if self.home_address == None and randint(0,9):
             self.alive = False
-            print(str(self) + 'died of exposure **************************')
+            print(str(self.name) + ' died of exposure **************************')
 
     def give_birth_chance(self):
         if self.gender == 'female' and self.age > 15 and self.age <= 55 and self.spouse and self.spouse.alive:
@@ -161,7 +161,7 @@ class Person(object):
                 groom.move_family_into_house()
                 bride.move_family_into_house()
 
-                assert(groom.alive and bride.alive)
+                assert (groom.alive and bride.alive)
                 
                 if groom.home_address != bride.home_address:
                     raise NameError('bride and groom didn\'t go home to the same house')
@@ -213,10 +213,10 @@ class Person(object):
         shuffle(rand_job_list)
         for market in rand_job_list:
             if economy[market].empty(): #at least one person will always try each job
-                #print(self.name + ' started a ' + market + '. Price: ' + str(self.price))
+                print(self.name + ' started a ' + str(market) + '. Price: ' + str(self.price))
                 return market_job_dict[market]
             elif economy[market].queue[0][0] > self.price:
-                #print(self.name + ' joined the ' + str(market))
+                print(self.name + ' joined the ' + str(market) + ' market')
                 return market_job_dict[market]
         #print(self.name + ' BECAME a farmer')
         return self.farm #people farm if they don't have other good options
@@ -251,7 +251,7 @@ class Person(object):
             else:
                 self.owns[item].append( item() )
             seller.listings[item] -= 1
-            #print(self.name + ' bought a(n) ' + str(item) + ' from ' + seller.name + '. Price: ' + str(price))
+            print(self.name + ' bought a(n) ' + str(item) + ' from ' + seller.name + '. Price: ' + str(price))
 
     def move_family_into_house(self):
         '''

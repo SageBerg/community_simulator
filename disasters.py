@@ -33,3 +33,13 @@ def end_famine_maybe(person_list):
         return False
     return True
 
+def fire(house_list):
+    if randint(0, 50) == 0:
+        destruction_threshold = randint(10, 50)
+        for house in house_list:
+            if randint(0, 100) < destruction_threshold:
+                house.durability = 0
+                print(str(house) + ' burned down ^^^^^^')
+                #+ u"\U0001F525")
+                for person in house.occupants:
+                    print(person.name)
