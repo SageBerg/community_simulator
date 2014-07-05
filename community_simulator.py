@@ -40,8 +40,8 @@ def main():
         person.age  = 10
         person.food = 5
         house = House()
-        person.owns['house'] = [ house ]
-        person.home_address = person.owns['house'][0]
+        person.owns[House] = [ house ]
+        person.home_address = person.owns[House][0]
         house.occupants.append(person)
         house_list.append(house)
 
@@ -77,6 +77,7 @@ def main():
         spend() 
         set_prices()     #prices change based on demand
 
+        theft()
         eat()
 
         if famine_flag: 
@@ -180,45 +181,11 @@ def death():
         if key:
             cause_of_death_dict[key] += 1
         if person.alive == False:
-            #cause_of_death_dict['age/sickness'] += 1 
             person_list.remove(person)
+            person.inheritance()
+            person.remove_self_from_parents_children()
+            person.divorce() 
 
-            #TO DO: add have listings be inheritable as well
-            if person.spouse != None:
-                for key in person.owns.keys():
-                    if key not in person.spouse.owns:
-                        person.spouse.owns[key] = person.owns[key]
-                    else:
-                        person.spouse.owns[key] += person.owns[key]
-                #if person.gender == 'female':
-                #    print(person.name + ' died and left her items to her husband ' + person.spouse.name)
-                #else:
-                #    print(person.name + ' died and left his items to his wife ' + person.spouse.name)
-            elif len(person.children) > 0:
-                for key in person.owns.keys():
-                    if key not in person.children[0].owns:
-                        person.children[0].owns[key] = person.owns[key]
-                    else:
-                        person.children[0].owns[key] += person.owns[key]
-                    #print(person.children[0].name + ' inherited ' + str(len(person.owns[key])) + ' ' + key + 's')
-                    #print(person.owns)
-                    #print(person.children[0].owns)
-                #raise NameError('child inherited stuff')
-            else:
-                pass
-                #print('no one was alive to inhereit ' + person.name + '\'s items')
-            try:
-                person.mother.children.remove(person)
-                person.father.children.remove(person)
-            except:
-                #print('initial people don\'t have parents') 
-                pass
-            #print(person.name + ' died at age: ' + str(person.age))
-
-            if person.spouse:
-                person.spouse.spouse = None #people can't be married to dead people
-            person.spouse = None  
-            
     for market in economy.keys():
         update_market(market)
 
@@ -286,5 +253,9 @@ def spend():
 def set_prices():
     for person in person_list:
         person.set_price()
+    
+def theft():
+    for person in person_list:
+        person.steal(person_list)
     
 main()

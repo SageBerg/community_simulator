@@ -45,17 +45,20 @@ class Person(object):
         self.intelligence = None
         self.thriftiness  = None
         self.creativity   = None
+        self.vigilance    = None
         self.pride        = self.attribute_gen(self.pride)
         self.morality     = self.attribute_gen(self.morality)
         self.intelligence = self.attribute_gen(self.intelligence)
         self.thriftiness  = self.attribute_gen(self.thriftiness)
         self.creativity   = self.attribute_gen(self.creativity)
+        self.vigilance    = self.attribute_gen(self.vigilance)
 
         #skills
         self.job   = self.farm #self.job = function
         self.price = randint(5,9) 
+        self.strength   = 1 - death_dict[self.age]
         self.farm_skill = 5 
-        #self.fight
+        #self.fight = 
         #self.persuasion
         #self.parenting
        
@@ -121,6 +124,40 @@ class Person(object):
             return 'exposure'
             #print(str(self.name) + ' died of exposure **************************')
 
+    def inheritance(self):
+            #TO DO: add have listings be inheritable as well
+        if self.spouse:
+            self.bequeath(self.spouse)
+
+        elif len(self.children) > 0:
+            self.bequeath(self.children[0])
+
+        elif self.mother and self.mother.alive:
+            self.bequeath(self.mother)
+
+        elif self.father and self.father.alive:
+            self.bequeath(self.father)
+
+        else:
+            pass
+            #later government inherits items
+
+    def bequeath(self, recipient):
+        for key in self.owns.keys():
+            if key not in recipient.owns:
+                recipient.owns[key] =  self.owns[key]
+            else:
+                recipient.owns[key] += self.owns[key]
+        recipient.food += self.food
+
+    def remove_self_from_parents_children(self):
+        try:
+            self.mother.children.remove(self)
+            self.father.children.remove(self)
+        except:
+            #print('initial people don\'t have parents')
+            pass
+    
     def give_birth_chance(self):
         if self.gender == 'female' and self.age > 15 and self.age <= 55 and self.spouse and self.spouse.alive:
             if randint(-60, 60) > self.age:
@@ -175,6 +212,11 @@ class Person(object):
 
                 singles.remove(potential_mate)
                 break
+
+    def divorce(self):
+        if self.spouse:
+            self.spouse.spouse = None
+        self.spouse = None
 
     def farm(self, economy):
         production = self.farm_skill
@@ -307,6 +349,21 @@ class Person(object):
                 self.alive = False
                 return 'starvation' 
                 #print(self.name + ' starved to death 0X')
+                
+    def steal(self, person_list):
+        if self.food + self.morality < 0:
+            victim = person_list[randint(0, len(person_list)-1)]
+            if victim.food > self.morality:
+                if victim.vigilance > self.vigilance:
+                    if victim.morality < 0:
+                        if randint(0, 9) == 0:
+                            pass
+                            #print('fight')
+                victim.food -= 1
+                self.food += 1
+                #print(self.name + ' stole from ' + victim.name)
+            else:
+                self.steal(person_list)
 
 def print_fathers(person):
     while person:
