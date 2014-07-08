@@ -3,7 +3,12 @@ Sage Berg, Erica Johnson
 Created 5 July 2014
 '''
 
+from sys     import argv
 from tkinter import *
+from items   import *
+from person_class    import *
+from community_class import *
+from government      import *
 
 class World(object):
     
@@ -13,36 +18,39 @@ class World(object):
         self.governments = list()
         self.communities = list()
 
-#         self.root = Tk()
-#         self.canvas = Canvas(self.root, height=1000, width=1800, bd=0, bg='white')
-#         self.canvas.pack()
-#         x = 0
-#         y = 0 
-#         offset_flag = True 
-#         #for i in range(6):
-#         #    self.canvas.creat_polygon( 
-#         for i in range(1000): 
-#             self.canvas.create_polygon(x-43, y-25, 
-#                                        x   , y-50, 
-#                                        x+43, y-25, 
-#                                        x+43, y+25, 
-#                                        x   , y+50, 
-#                                        x-43, y+25, fill='#3cb371', outline='black', width=1)
-#             x += 86
-#             if x > 1900:
-#                 if offset_flag:
-#                     x = 43
-#                     offset_flag = False
-#                 else:
-#                     x = 0
-#                     offset_flag = True
-#                 y += 75 
-#         #self.canvas.create_polygon(200, 200, 200, 250, 243, 275, 286, 250, 286, 200, 243, 175, fill='#30AA50',
-#         #                           outline='black', width = 1)
-#         #self.canvas.create_line(243, 0, 243, 400)
-#         #self.canvas.create_line(0, 225, 400, 225)
-#         self.root.mainloop()
+    def time(self, years):
+        for year in range(years):
+            self.print_news()
+            for community in self.communities:
+                community.bring_out_your_dead
+            for community in self.communities:
+                community.courtship
+            self.year += 1
 
-    #def draw_hex_block(self):
+    def print_news(self):
+        print()
+        print('------- year ' + str(self.year) + ' -------')
 
-World()
+def main():
+    '''
+    usage: $ python3 world.py 1000 200
+    in this example: simulation starts with 1000 initial people
+    in this example: simulation runs for 200 years
+    '''
+    if len(argv) < 3:
+        raise NameError('USAGE: $ python3 world.py 1000 200')
+    world = World()
+    world.communities.append( Community() )
+    for i in range( int(argv[1]) ):
+        world.communities[0].person_list.append(Person())
+    for person in world.communities[0].person_list:
+        person.age  = 10 
+        person.food = 5
+        house = House()
+        person.owns[House] = [ house ]
+        person.move_family_into_house()
+        world.communities[0].house_list.append(house)
+    world.time( int(argv[2]) )
+
+if __name__ == "__main__":
+    main()
