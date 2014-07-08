@@ -334,12 +334,14 @@ class Person(object):
             self.home_address.occupants.append(person) 
             #print(person.name + ' moved into ' + self.name + '\'s house')
     
-    def eat(self):
+    def eat(self, government):
         if self.age < 10:
             if self.father.food > 0:
                 self.father.food -= 1
             elif self.mother.food > 0:
                 self.mother.food -= 1
+            elif government.food > 0:
+                government.food -= 1
             else:
                 self.alive = False
                 return 'child starvation' 
@@ -349,6 +351,8 @@ class Person(object):
                 self.food -= 1
             elif self.food == 0 and self.spouse != None and self.spouse.food > 1:
                 self.spouse.food -= 1
+            elif government.food > 0:
+                government.food -= 1
             else: 
                 self.alive = False
                 return 'starvation' 

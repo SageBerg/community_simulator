@@ -11,12 +11,15 @@ from person_class import Person, print_fathers
 from disasters    import *
 from items        import *
 from error_checking_functions import *
-from death_dict  import death_dict
+from death_dict   import death_dict
+from government   import *
 
-person_list = list()
+person_list       = list()
 single_male_set   = set()
 single_female_set = set()
-family = dict()
+family            = dict()
+government_list   = list()
+ruler_list        = list()
 
 cause_of_death_dict = dict()
 cause_of_death_dict['age/sickness'] = 0
@@ -77,9 +80,19 @@ def main():
 
         spend() 
         set_prices()     #prices change based on demand
+        
+        if not government_list:
+            insurrection()
+        if person_list:
+            if government_list[0].leader not in ruler_list:
+                ruler_list.append(government_list[0].leader)
+            government_list[0].collect_taxes(person_list)
+            government_list[0].succession()
+            if government_list[0].leader == None:
+                insurrection()
 
         theft()
-        eat()
+        nutrition()
 
         if famine_flag: 
             famine_flag = end_famine_maybe(person_list)
@@ -135,6 +148,14 @@ def main():
     print()
     for key, value in cause_of_death_dict.items():
         print(key.ljust(20), value)
+    
+    print()
+    print('Rulers:')
+    for ruler in ruler_list:
+        print('    ' + ruler.name.ljust(24) + 'pride: ' + str(ruler.pride))
+        
+    print()
+    print('Government food: ' + str(government_list[0].food))
 
 def decay(item):
     item.durability -= randint(0,5)
@@ -241,9 +262,9 @@ def work():
                 person.job = person.change_job(economy)
             person.job(economy)
 
-def eat():
+def nutrition():
     for person in person_list:
-        key = person.eat()
+        key = person.eat(government_list[0])
         if key:
             cause_of_death_dict[key] += 1
 
@@ -258,5 +279,21 @@ def set_prices():
 def theft():
     for person in person_list:
         person.steal(person_list)
+        
+def insurrection():
+    if person_list:
+        most_proud = None
+        for person in person_list:
+            if  most_proud == None or person.pride > most_proud.pride:
+                most_proud = person
+        if not government_list:
+            new_government = Government()
+            new_government.leader = most_proud
+            government_list.append(new_government)
+            print("A NEW GOVERNMENT WAS MADE BY " + most_proud.name)
+        else:
+            government_list[0].leader = most_proud
+    
+    
     
 main()

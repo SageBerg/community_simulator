@@ -3,16 +3,36 @@ Sage Berg, Erica Johnson
 Created 5 July 2014
 '''
 
-class government(object):
+from random import *
+
+class Government(object):
     
     def __init__(self):
-        self.leader     = None
+        self.leader      = None
         #self.location   = (0, 0)
-        self.military   = list()
-        self.communitie = list()
-        self.tax        = 0 #amount of food taken per year
-        self.owns       = dict()
-        self.in_hiding  = False
+        self.military    = list()
+        self.communities = list()
+        self.tax         = randint(1, 3) #amount of food taken per year
+        self.owns        = dict()
+        self.in_hiding   = False
+        self.food        = 0
+        
+    def succession(self):
+        if self.leader.alive == False:
+            if self.leader.children:
+                heir = self.leader.children[0]
+                self.leader = heir
+            elif self.leader.spouse:
+                heir = self.leader.spouse
+                self.leader = heir
+            else:
+                self.leader = None
+                
+    def collect_taxes(self, person_list):
+        for person in person_list:
+            if person.food > self.tax + len(person.children):
+                person.food -= self.tax   
+                self.food += self.tax 
 
     def declare_war(self, governments_list):
         pass
