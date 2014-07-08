@@ -293,6 +293,4 @@ def insurrection():
         else:
             government_list[0].leader = most_proud
     
-    
-    
 main()
