@@ -157,10 +157,10 @@ def main():
     print()
     print('Government food: ' + str(government_list[0].food))
 
-def decay(item):
+def decay(item):               #Now in item_superclass as decay()
     item.durability -= randint(0,5)
 
-def destruction():
+def destruction():             #Now in community_class as destruction()
     for person in person_list: #people leave destroyed homes
         if person.home_address != None and person.home_address.durability <= 0:
             person.home_address.occupants.remove(person)
@@ -218,6 +218,7 @@ def death():
                 #person.home_address = None 
                 #house.occupants.remove(person)
                 pass 
+                
 def exposure():
     for person in person_list:
         key = person.death_by_exposure_chance()
@@ -234,7 +235,7 @@ def birth():
         if baby:
             person_list.append(baby)
 
-def search_for_spouse():
+def search_for_spouse():          #Now in community_class as search_for_spouse()
     global single_male_set
     global single_female_set
     for person in person_list:
@@ -246,14 +247,12 @@ def search_for_spouse():
                 #print(person.name + ' ' + str( person.age ) + ' is looking for a husband!!!')
     single_male_set   = {male   for male   in single_male_set   if male.alive   and male.spouse   == None}
     single_female_set = {female for female in single_female_set if female.alive and female.spouse == None}
-    #print("          single male length: " + str(len(single_male_set)))
     for male in single_male_set:
         male.marriage(single_female_set)
-        #print("               " + male.name)
-    #print("          single female length: " + str(len(single_female_set)))
-    #for female in single_female_set:
-    #    female.marraige(single_male_set) #weird error female has no attribute marriage
-        #print("               " + female.name)
+    single_male_set   = {male   for male   in single_male_set   if male.alive   and male.spouse   == None}
+    for female in single_female_set:
+        female.marriage(single_male_set) #might cause error
+    
 
 def work():
     for person in person_list:

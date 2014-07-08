@@ -185,8 +185,8 @@ class Person(object):
 
                 return baby
     
-    def marriage(self, singles):
-        for potential_mate in singles:
+    def marriage(self, prospect_set):
+        for potential_mate in prospect_set:
             if potential_mate.last_name != self.last_name and \
                potential_mate != self.mother and \
                potential_mate != self.father and \
@@ -214,7 +214,7 @@ class Person(object):
                     if groom.home_address.occupants != bride.home_address.occupants:
                         raise NameError('occupants list not equal after wedding')
 
-                singles.remove(potential_mate)
+                prospect_set.remove(potential_mate)
                 break
 
     def divorce(self):
