@@ -17,13 +17,14 @@ class Community(object):
     def __init__(self):
 
         #self.name              = self.name_gen()
-        #self.government        = None
+        self.government        = None
         #self.location          = (0, 0)
         self.person_list       = list()
         self.single_male_set   = set()
         self.single_female_set = set()
         self.economy           = dict()
         self.house_list        = list()
+        self.persisting_famine = False
 
         self.economy[Plow]  = PriorityQueue()
         self.economy[House] = PriorityQueue()
@@ -36,7 +37,7 @@ class Community(object):
         for person in self.person_list:
             if person.alive == False:
                 self.person_list.remove(person)
-                self.inheritance(person)
+                person.inheritance()
                 person.divorce() #can't be married to the dead
                 person.remove_self_from_parents_children()
 #                person.home_address.occupants.remove(person)        #may cause errors
@@ -47,7 +48,7 @@ class Community(object):
         for person in self.person_list:
             person.death_chance()
 
-    def exposure():
+    def exposure(self):
         for person in self.person_list:
             person.death_by_exposure_chance()
 
@@ -94,12 +95,6 @@ class Community(object):
                     item.decay()
                     if item.durability <= 0:
                         item_list.remove(item) 
-                        
-    def leave_ruined_house(self):
-        for person in self.person_list:
-            if person.home_address != None and person.home_address.durability <= 0:
-                person.home_address.occupants.remove(person)
-                person.home_address = None
                 
     def courtship(self):
         for person in self.person_list:
@@ -117,7 +112,13 @@ class Community(object):
         self.single_male_set   = \
         {male   for male   in self.single_male_set   if male.alive   and male.spouse   == None} 
         for female in self.single_female_set:
-            self.female.marriage(self.single_male_set) 
+            female.marriage(self.single_male_set) 
+                                       
+    def leave_ruined_house(self):
+        for person in self.person_list:
+            if person.home_address != None and person.home_address.durability <= 0:
+                person.home_address.occupants.remove(person)
+                person.home_address = None
 
     def update_house_list(self):
         new_house_list = list()
@@ -128,9 +129,22 @@ class Community(object):
 
     def update_market(self, market):
         new_market = PriorityQueue()
-        for i in range(economy[market].qsize()):
-            listing = economy[market].get()
+        for i in range(self.economy[market].qsize()):
+            listing = self.economy[market].get()
             seller = listing[2]
             if seller.alive:
                 new_market.put(listing)
         self.economy[market] = new_market
+        
+    def insurrection(self):
+        if self.person_list:
+            most_proud = None
+            for person in self.person_list:
+                if  most_proud == None or person.pride > most_proud.pride:
+                    most_proud = person
+            if not self.government:
+                new_government = Government()
+                new_government.leader = most_proud
+                self.government = new_government
+            else:
+                self.government.leader = most_proud
