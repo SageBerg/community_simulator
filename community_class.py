@@ -11,12 +11,13 @@ from items        import *
 from error_checking_functions import *
 from death_dict   import death_dict
 from government   import *
+from town_gen     import *
 
 class Community(object):
     
     def __init__(self):
 
-        #self.name              = self.name_gen()
+        self.name              = gen_town_name()
         self.government        = None
         #self.location          = (0, 0)
         self.person_list       = list()
@@ -26,9 +27,8 @@ class Community(object):
         self.house_list        = list()
         self.persisting_famine = False
 
-        self.economy[Plow]  = PriorityQueue()
-        self.economy[House] = PriorityQueue()
-        self.economy[Wine]  = PriorityQueue()
+        for item in [Plow, House, Wine]:
+            self.economy[item] = PriorityQueue()
 
     def bring_out_your_dead(self):         
         '''
@@ -38,7 +38,7 @@ class Community(object):
             if person.alive == False:
                 self.person_list.remove(person)
                 person.inheritance()
-                person.divorce() #can't be married to the dead
+                person.divorce() 
                 person.remove_self_from_parents_children()
 #                person.home_address.occupants.remove(person)        #may cause errors
         for market in self.economy.keys():
@@ -63,8 +63,8 @@ class Community(object):
     def birth(self):
         for person in self.person_list:
             baby = person.give_birth_chance()
-        if baby:
-            self.person_list.append(baby)
+            if baby:
+                self.person_list.append(baby)
 
     def work(self):
         for person in self.person_list:
@@ -73,7 +73,7 @@ class Community(object):
                     person.job = person.change_job(self.economy)
                 person.job(self.economy)
 
-    def spend(self):
+    def shop(self):
         for person in self.person_list:
             person.spend(self.economy)
 
