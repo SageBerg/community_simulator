@@ -1,7 +1,6 @@
 '''
 disasters.py
 This file defines disaster functions that might befall the community
-intended to be imported by community_simulator.py
 
 Sage Berg, Erica Johnson, Skyler Berg
 Created 12 June 2014
@@ -25,7 +24,7 @@ def famine(person_list):
         print('A FAMINE HAS STRUCK THE LAND............................')
         for person in person_list:
             person.farm_skill -= 5
-        return True #used by famine flag
+        return True #used by community.persisting_famine 
     return False # if there isn't a famine
 
 def end_famine_maybe(person_list):
@@ -42,7 +41,3 @@ def fire(house_list):
         for house in house_list:
             if randint(0, 100) < destruction_threshold:
                 house.durability = 0
-                #print(str(house) + ' burned down ^^^^^^')
-                #+ u"\U0001F525")
-                #for person in house.occupants:
-                #    print(person.name)
