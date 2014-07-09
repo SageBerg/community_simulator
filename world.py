@@ -21,49 +21,75 @@ class World(object):
 
     def time(self, years):
         for year in range(years):
+
             self.print_news()
+
             for community in self.communities:
+                #assertions
+                spouse_house_check(community.person_list)
+                house_search(community.house_list, community.person_list)
+                child_search(community.person_list)
+                spouse_search(community.person_list)
+                
+                #disasters
                 plague(community.person_list)
-            for community in self.communities:
                 fire(community.house_list)
-            for community in self.communities:
-                if community.persisting_famine == True:
+                if community.persisting_famine:
+                    community.persisting_famine = end_famine_maybe(community.person_list)
+                if not community.persisting_famine:
                     community.persisting_famine = famine(community.person_list)
+                
+                #changes in government
+                if community.government == None:
+                    community.insurrection()
+                if community.person_list and community.government.leader:
+                    community.government.collect_taxes(community.person_list)
+                    community.government.succession()
+                if community.government.leader == None or \
+                   community.government.leader.alive == False:
+                    community.government == None
+           
             self.community_act(community.exposure)
-            for community in self.communities:
-                community.death()
-            for community in self.communities:
-                community.bring_out_your_dead()
-            for community in self.communities:
-                community.destruction()
-            for community in self.communities:
-                community.leave_ruined_house
-            for community in self.communities:
-                community.update_house_list
-            for community in self.communities:
-                community.courtship()
+            self.community_act(community.death)
+            self.community_act(community.bring_out_your_dead)
+            self.community_act(community.destruction)
+            self.community_act(community.leave_ruined_house)
+            self.community_act(community.update_house_list)
+            self.community_act(community.birth)
+            self.community_act(community.age)
+            self.community_act(community.courtship)
+            self.community_act(community.work)
+            self.community_act(community.shop)
+            self.community_act(community.theft)
+            self.community_act(community.set_prices)     
+            self.community_act(community.nutrition)
+
             self.year += 1
-            
-#         plague_death_count = plague(person_list)
-#         if plague_death_count:
-#             cause_of_death_dict['plague'] += plague_death_count
-#         fire(house_list)
-#         if famine_flag == False:
-#             famine_flag = famine(person_list)
-# #        global_decay()
-#         exposure()
-#         death()             #kills and removes people from lists
-#         destruction()       #decays and removes items
-#         house_list = update_house_list() #adds new houses
-#         age()               #increments everyone's age
-#         birth()
-#         search_for_spouse()
-#         work()
 
     def print_news(self):
         print()
         print('------- year ' + str(self.year) + ' -------')
-        
+        for community in self.communities:
+            print(community.name + ' has ' + str(len(community.person_list)) + ' residents')
+   
+    def print_final_summary(self):
+        for community in self.communities:
+            print()
+            family = dict()
+            for person in community.person_list:
+                if person.last_name in family:
+                    family[person.last_name] += 1
+                else:
+                    family[person.last_name] = 1
+            tup_list = list()
+            for group in family.keys():
+                tup_list.append( (family[group], group) ) 
+            tup_list.sort()
+            for family in tup_list:
+                print( family[1].ljust(15), family[0] )
+            print() 
+            print('The government of ' + community.name + ' has ' + str(community.government.food) + ' food.')
+
     def community_act(self, function):     #optional argument arg?
         for community in self.communities:
             function()
@@ -88,6 +114,7 @@ def main():
         person.move_family_into_house()
         world.communities[0].house_list.append(house)
     world.time( int(argv[2]) )
+    world.print_final_summary()
 
 if __name__ == "__main__":
     main()
