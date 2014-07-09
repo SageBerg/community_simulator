@@ -359,8 +359,8 @@ class Person(object):
                 #print(self.name + ' starved to death 0X')
                 
     def steal(self, person_list):
-        if self.food + self.morality < 0:
-            victim = person_list[randint(0, len(person_list)-1)]
+        if self.food + self.morality < 0 and len(person_list) > 1:
+            victim = choice(person_list)
             if victim.food > self.morality:
                 if victim.vigilance > self.vigilance:
                     if victim.morality < 0:
@@ -370,8 +370,6 @@ class Person(object):
                 victim.food -= 1
                 self.food += 1
                 #print(self.name + ' stole from ' + victim.name)
-            else:
-                self.steal(person_list)
 
 def print_fathers(person):
     while person:
