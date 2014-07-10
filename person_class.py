@@ -57,7 +57,7 @@ class Person(object):
         self.job   = self.farm #self.job = function
         self.price = randint(5,9) 
         self.strength   = 1 - 10*death_dict[self.age] #make better scale for strength later
-        self.farm_skill = 5 
+        self.farm_skill = 5 #do not change without changing the famine function in disasters.py
         #self.fight = 
         #self.persuasion
         #self.parenting
@@ -120,13 +120,13 @@ class Person(object):
     def death_chance(self): #death from old age, sickness, and accidents
         if randint(0,100) <= death_dict[self.age]*100: 
             self.alive = False
-            return 'age/sickness'
+            #return 'age/sickness'
 
     def death_by_exposure_chance(self):
-        if self.home_address == None and randint(0,9):
+        if self.home_address == None and randint(0,9) == 0:
             self.alive = False
-            return 'exposure'
             #print(str(self.name) + ' died of exposure **************************')
+            #return 'exposure'
 
     def inheritance(self):
             #TO DO: add have listings be inheritable as well

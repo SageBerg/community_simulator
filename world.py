@@ -69,13 +69,17 @@ class World(object):
         print()
         print('------- year ' + str(self.year) + ' -------')
         for community in self.communities:
-            print(community.name.ljust(15) + ' has ' + str(len(community.person_list)) + ' residents')
+            print(community.name.ljust(15) + ' has ' + str(len(community.person_list)).ljust(6) + ' residents')
+            print(''.ljust(20) + str(len(community.house_list)).ljust(6) + ' houses')
    
     def print_final_summary(self):
         for community in self.communities:
-            self.print_family_sizes(community)
-            self.print_occupations(community)
             print()
+            print('--- --- --- ' + community.name + ' --- --- --- ')
+            print()
+            self.print_family_sizes(community)
+            self.print_occupations( community)
+            self.print_homelessness(community)
             print('The government of ' + community.name + ' has ' + str(community.government.food) + ' food.')
 
     def print_family_sizes(self, community):

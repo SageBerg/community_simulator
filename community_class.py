@@ -40,7 +40,8 @@ class Community(object):
                 person.inheritance()
                 person.divorce() 
                 person.remove_self_from_parents_children()
-#                person.home_address.occupants.remove(person)        #may cause errors
+                if person.home_address:
+                    person.home_address.occupants.remove(person) 
         for market in self.economy.keys():
             self.update_market(market) 
 
@@ -69,7 +70,7 @@ class Community(object):
     def work(self):
         for person in self.person_list:
             if person.age >= 10:
-                if person.food < 1: 
+                if randint(0,99) == 0:
                     person.job = person.change_job(self.economy)
                 person.job(self.economy)
 
@@ -95,7 +96,10 @@ class Community(object):
                     item.decay()
                     if item.durability <= 0:
                         item_list.remove(item) 
-                
+        for house in self.house_list:
+            if house.durability < 1:
+                self.house_list.remove(house)
+
     def courtship(self):
         for person in self.person_list:
             if person.spouse == None and person.age >= 10:
@@ -125,7 +129,7 @@ class Community(object):
         for person in self.person_list:
             if person.home_address != None and person.home_address not in new_house_list:
                 new_house_list.append(person.home_address)
-        return new_house_list
+        self.house_list  = new_house_list
 
     def update_market(self, market):
         new_market = PriorityQueue()
@@ -145,6 +149,8 @@ class Community(object):
             if not self.government:
                 new_government = Government()
                 new_government.leader = most_proud
+                if self.government:
+                    new_government.food = self.government.food
                 self.government = new_government
             else:
                 self.government.leader = most_proud
