@@ -273,13 +273,7 @@ class Person(object):
         return self.farm #people farm if they don't have other good options
 
     def spend(self, economy):
-        if self.home_address == None:
-
-            if self.spouse:
-                if self.spouse.home_address:
-                    print()
-                    print(self)
-                    raise NameError('the spouse (' + self.spouse.name + ') had a house and wasn\'t sharing')
+        if self.home_address == None or len(self.home_address.occupants) > 15:
             self.buy(House, economy)
             self.move_family_into_house()
 
