@@ -57,6 +57,12 @@ class Community(object):
         for person in self.person_list:
             person.eat(self.government)
     
+    def food_rot(self):
+        for person in self.person_list:
+            person.food //= 1.2 
+        if self.government:
+            self.government.food //= 1.2
+
     def age(self):
         for person in self.person_list:
             person.get_older()
@@ -70,7 +76,7 @@ class Community(object):
     def work(self):
         for person in self.person_list:
             if person.age >= 10:
-                if randint(0,99) == 0:
+                if randint(0,49) == 0:
                     person.job = person.change_job(self.economy)
                 person.job(self.economy)
 

@@ -187,10 +187,13 @@ class Person(object):
     
     def marriage(self, prospect_set):
         for potential_mate in prospect_set:
-            if potential_mate.last_name != self.last_name and \
+            if potential_mate not in self.children and \
+               (potential_mate.mother != self.mother or \
+                self.father == None) and \
+               (potential_mate.father != self.father or \
+                self.mother == None) and \
                potential_mate != self.mother and \
-               potential_mate != self.father and \
-               potential_mate not in self.children:
+               potential_mate != self.father:
                 if potential_mate.gender == 'female':
                     bride = potential_mate
                     groom = self

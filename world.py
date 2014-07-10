@@ -49,6 +49,7 @@ class World(object):
                 self.community_act(community.exposure)
                 self.community_act(community.death)
                 self.community_act(community.bring_out_your_dead)
+                #self.community_act(community.food_rot)
                 self.community_act(community.destruction)
                 self.community_act(community.leave_ruined_house)
                 self.community_act(community.update_house_list)
