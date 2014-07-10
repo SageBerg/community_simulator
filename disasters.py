@@ -14,14 +14,14 @@ def plague(person_list):
         plague_death_count = 0
         for person in person_list:
             if randint(0, 100) < death_threshold:
-                print(person.name + ' died of plague 0X 0X 0X 0X 0X.')
+                #print(person.name + ' died of plague 0X 0X 0X 0X 0X.')
                 person.alive = False
                 plague_death_count += 1
         return plague_death_count
 
 def famine(person_list):
     if randint(0, 100) == 0:
-        print('A FAMINE HAS STRUCK THE LAND............................')
+        #print('A FAMINE HAS STRUCK THE LAND............................')
         for person in person_list:
             person.farm_skill -= 5
         return True #used by community.persisting_famine 
@@ -29,7 +29,7 @@ def famine(person_list):
 
 def end_famine_maybe(person_list):
     if randint(0,2) == 0:
-        print('THE FAMINE HAS ENDED')
+        #print('THE FAMINE HAS ENDED')
         for person in person_list:
             person.farm_skill += 5
         return False
