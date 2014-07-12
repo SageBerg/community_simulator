@@ -22,6 +22,8 @@ class World(object):
     def time(self, years):
         for year in range(years):
             for community in self.communities:
+                if community.government not in self.governments:
+                    self.governments.append(community.government)
                 #assertions
                 spouse_house_check(community.person_list)
                 house_search(community.house_list, community.person_list)
@@ -29,7 +31,8 @@ class World(object):
                 spouse_search(community.person_list)
                 
                 #disasters
-                plague(community.person_list)
+                for i in range(len(community.person_list) // 100):
+                    plague(community.person_list)
                 fire(community.house_list)
                 if community.persisting_famine:
                     community.persisting_famine = end_famine_maybe(community.person_list)
@@ -45,6 +48,7 @@ class World(object):
                 if community.government.leader == None or \
                    community.government.leader.alive == False:
                     community.government == None
+                    community.insurrection()
              
                 self.community_act(community.exposure)
                 self.community_act(community.death)
@@ -61,10 +65,26 @@ class World(object):
                 self.community_act(community.theft)
                 self.community_act(community.set_prices)     
                 self.community_act(community.nutrition)
+                
+            war_list = self.gen_war_ready_government_list()
+            if len(war_list) > 1:
+                for government in war_list:
+                    if randint(0, 99) == 0:
+                        government.declare_war(war_list)
 
             self.year += 1
 
             self.print_news()
+            
+    def gen_war_ready_government_list(self):
+        '''
+        returns a list
+        '''
+        war_ready_government_list = list()
+        for gov in self.governments:
+            if gov and gov.leader:
+                war_ready_government_list.append(gov)
+        return war_ready_government_list
 
     def print_news(self):
         print()
@@ -72,6 +92,11 @@ class World(object):
         for community in self.communities:
             print(community.name.ljust(15) + ' has ' + str(len(community.person_list)).ljust(6) + ' residents')
             print(''.ljust(20) + str(len(community.house_list)).ljust(6) + ' houses')
+            try:
+                print(community.government.leader.title + ' ' + community.government.leader.name)
+            except:
+                print(community.name + ' bows to no one.')
+            print()
    
     def print_final_summary(self):
         for community in self.communities:

@@ -17,16 +17,26 @@ class Government(object):
         self.in_hiding   = False
         self.food        = 0
         
+    def coronation(self):
+        if self.leader.gender == 'female':
+            self.leader.title = 'Queen'
+        else:
+            self.leader.title = 'King'
+        
     def succession(self):
         if self.leader.alive == False:
+            #print(self.leader.title + ' ' + self.leader.name + ' has died.')
             if self.leader.children:
                 heir = self.leader.children[0]
                 self.leader = heir
+                self.coronation()
             elif self.leader.spouse:
                 heir = self.leader.spouse
                 self.leader = heir
+                self.coronation()
             else:
                 self.leader = None
+                #print('...and there is no heir')
                 
     def collect_taxes(self, person_list):
         for person in person_list:
@@ -35,7 +45,12 @@ class Government(object):
                 self.food += self.tax 
 
     def declare_war(self, governments_list):
-        pass
+        rival = choice(governments_list)
+        while rival == self:
+            rival = choice(governments_list)
+        print(self.leader.title + ' ' + self.leader.name + ' has declared war on ' + \
+              rival.leader.title + ' ' + rival.leader.name + '!')
+            
 
     def hire_workers(self):
         pass 

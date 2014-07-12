@@ -155,8 +155,10 @@ class Community(object):
             if not self.government:
                 new_government = Government()
                 new_government.leader = most_proud
+                new_government.coronation()
                 if self.government:
                     new_government.food = self.government.food
                 self.government = new_government
             else:
                 self.government.leader = most_proud
+                self.government.coronation()
