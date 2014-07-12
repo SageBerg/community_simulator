@@ -25,6 +25,7 @@ class Person(object):
         self.first_name = self.first_name_gen() 
         self.last_name  = Person.last_name_gen() 
         self.name       = self.first_name + ' ' + self.last_name
+        self.title      = None
         self.age        = 0
         
         #RELATIONS
