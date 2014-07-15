@@ -66,6 +66,14 @@ class World(object):
                 self.community_act(community.set_prices)     
                 self.community_act(community.nutrition)
                 
+            for government in self.governments:
+                if government:
+                    num = 0
+                    for community in government.communities:
+                        num += len(community.person_list)
+                    government.conscript_soldiers(num // 15)
+                    government.pay_workers()
+                
             war_list = self.gen_war_ready_government_list()
             if len(war_list) > 1:
                 for government in war_list:
@@ -128,6 +136,7 @@ class World(object):
         vinters    = 0
         plowrights = 0
         carpenters = 0
+        soldiers   = 0
         for person in community.person_list:
             if person.alive:
                 if person.job == person.farm:
@@ -136,6 +145,8 @@ class World(object):
                     carpenters += 1
                 elif person.job == person.make_wine:
                     vinters += 1
+                elif person.job == person.soldier:
+                    soldiers += 1
                 else:
                     plowrights += 1
         print()
@@ -143,6 +154,7 @@ class World(object):
         print('number of vinters: '.ljust(25)    + str(vinters))
         print('number of plowrights: '.ljust(25) + str(plowrights))
         print('number of carpenters: '.ljust(25) + str(carpenters))
+        print('number of soldiers: '.ljust(25)    + str(soldiers))
 
     def print_homelessness(self, community):
    

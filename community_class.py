@@ -42,6 +42,12 @@ class Community(object):
                 person.remove_self_from_parents_children()
                 if person.home_address:
                     person.home_address.occupants.remove(person) 
+        
+        if self.government:
+            for soldier in self.government.military:
+                if soldier.alive == False:
+                    self.government.military.remove(soldier)
+
         for market in self.economy.keys():
             self.update_market(market) 
 
@@ -154,6 +160,7 @@ class Community(object):
                     most_proud = person
             if not self.government:
                 new_government = Government()
+                new_government.communities.append(self)
                 new_government.leader = most_proud
                 new_government.coronation()
                 if self.government:

@@ -56,7 +56,10 @@ class Government(object):
         pass 
 
     def pay_workers(self):
-        pass
+        for soldier in self.military:
+            if self.food >= 10:
+                soldier.food += 10
+                self.food -= 10
 
     def fire_workers(self):
         pass
@@ -78,6 +81,14 @@ class Government(object):
         help it fight
         '''
         pass
+        
+    def conscript_soldiers(self, desired_military_size):
+        for community in self.communities:
+            for person in community.person_list:
+                if person.gender == 'male' and person.age > 14 and person.age < 36 \
+                and len(self.military) < desired_military_size:
+                    person.job = person.soldier
+                    self.military.append(person)
 
     def move_soldiers(self):
         '''
