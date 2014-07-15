@@ -43,6 +43,18 @@ class Government(object):
             if person.food > self.tax + len(person.children):
                 person.food -= self.tax   
                 self.food += self.tax 
+                
+    def war(self, winner, loser):
+        for i in range(len(winner.military)):
+            winner.military[i].alive = False
+            winner.food += loser.food
+        for community in loser.communities:
+            print(community.name + ' was taken in war')
+            winner.communities.append(community)
+            community.government = winner
+        for soldier in loser.military:
+            soldier.alive = False
+        return loser
 
     def declare_war(self, governments_list):
         rival = choice(governments_list)
@@ -50,8 +62,14 @@ class Government(object):
             rival = choice(governments_list)
         print(self.leader.title + ' ' + self.leader.name + ' has declared war on ' + \
               rival.leader.title + ' ' + rival.leader.name + '!')
+        if len(self.military) >= len(rival.military):
+            loser = self.war(self, rival)
+            print(self.leader.title + ' ' + self.leader.name + ' won the war!')
+        else:
+            loser = self.war(rival, self)
+            print(rival.leader.title + ' ' + rival.leader.name + ' won the war!')
+        return loser
             
-
     def hire_workers(self):
         pass 
 
@@ -86,7 +104,7 @@ class Government(object):
         for community in self.communities:
             for person in community.person_list:
                 if person.gender == 'male' and person.age > 14 and person.age < 36 \
-                and len(self.military) < desired_military_size:
+                and len(self.military) < desired_military_size and person.job != person.soldier:
                     person.job = person.soldier
                     self.military.append(person)
 

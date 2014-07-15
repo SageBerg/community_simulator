@@ -159,6 +159,7 @@ class Community(object):
                 if  most_proud == None or person.pride > most_proud.pride:
                     most_proud = person
             if not self.government:
+                print('no government, so insurrection')
                 new_government = Government()
                 new_government.communities.append(self)
                 new_government.leader = most_proud

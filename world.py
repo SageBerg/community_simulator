@@ -21,9 +21,14 @@ class World(object):
 
     def time(self, years):
         for year in range(years):
+            #print('start of year # of govs ' + str(len(self.governments)) )
             for community in self.communities:
-                if community.government not in self.governments:
+                
+            
+                if community.government and community.government not in self.governments:
                     self.governments.append(community.government)
+                    print('added government')
+                    
                 #assertions
                 spouse_house_check(community.person_list)
                 house_search(community.house_list, community.person_list)
@@ -70,18 +75,22 @@ class World(object):
                 if government:
                     num = 0
                     for community in government.communities:
+                        print('calling soldiers from ' + community.name)
                         num += len(community.person_list)
+                        print('soliders wanted: ' + str(num//15))
                     government.conscript_soldiers(num // 15)
                     government.pay_workers()
                 
             war_list = self.gen_war_ready_government_list()
             if len(war_list) > 1:
                 for government in war_list:
-                    if randint(0, 99) == 0:
-                        government.declare_war(war_list)
+                    if randint(0, 20) == 0:
+                        loser = government.declare_war(war_list)
+                        self.governments.remove(loser)
+                        break #only one war per year allowed (or errors)
 
             self.year += 1
-
+            #print('end of year # of govs ' + str(len(self.governments)) )
             self.print_news()
             
     def gen_war_ready_government_list(self):
