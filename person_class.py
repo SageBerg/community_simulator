@@ -190,7 +190,8 @@ class Person(object):
     
     def marriage(self, prospect_set):
         for potential_mate in prospect_set:
-            if potential_mate not in self.children and \
+            if abs(potential_mate.age - self.age) <= 10 and \
+                potential_mate not in self.children and \
                (potential_mate.mother != self.mother or \
                 self.father == None) and \
                (potential_mate.father != self.father or \
