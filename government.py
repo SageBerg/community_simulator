@@ -17,31 +17,67 @@ class Government(object):
         self.in_hiding   = False
         self.food        = 0
         
+    def coronation(self):
+        if self.leader.gender == 'female':
+            self.leader.title = 'Queen'
+        else:
+            self.leader.title = 'King'
+        
     def succession(self):
         if self.leader.alive == False:
+            #print(self.leader.title + ' ' + self.leader.name + ' has died.')
             if self.leader.children:
                 heir = self.leader.children[0]
                 self.leader = heir
+                self.coronation()
             elif self.leader.spouse:
                 heir = self.leader.spouse
                 self.leader = heir
+                self.coronation()
             else:
                 self.leader = None
+                #print('...and there is no heir')
                 
     def collect_taxes(self, person_list):
         for person in person_list:
             if person.food > self.tax + len(person.children):
                 person.food -= self.tax   
                 self.food += self.tax 
+                
+    def war(self, winner, loser):
+        for i in range(len(winner.military)):
+            winner.military[i].alive = False
+            winner.food += loser.food
+        for community in loser.communities:
+            print(community.name + ' was taken in war')
+            winner.communities.append(community)
+            community.government = winner
+        for soldier in loser.military:
+            soldier.alive = False
+        return loser
 
     def declare_war(self, governments_list):
-        pass
-
+        rival = choice(governments_list)
+        while rival == self:
+            rival = choice(governments_list)
+        print(self.leader.title + ' ' + self.leader.name + ' has declared war on ' + \
+              rival.leader.title + ' ' + rival.leader.name + '!')
+        if len(self.military) >= len(rival.military):
+            loser = self.war(self, rival)
+            print(self.leader.title + ' ' + self.leader.name + ' won the war!')
+        else:
+            loser = self.war(rival, self)
+            print(rival.leader.title + ' ' + rival.leader.name + ' won the war!')
+        return loser
+            
     def hire_workers(self):
         pass 
 
     def pay_workers(self):
-        pass
+        for soldier in self.military:
+            if self.food >= 10:
+                soldier.food += 10
+                self.food -= 10
 
     def fire_workers(self):
         pass
@@ -63,6 +99,14 @@ class Government(object):
         help it fight
         '''
         pass
+        
+    def conscript_soldiers(self, desired_military_size):
+        for community in self.communities:
+            for person in community.person_list:
+                if person.gender == 'male' and person.age > 14 and person.age < 36 \
+                and len(self.military) < desired_military_size and person.job != person.soldier:
+                    person.job = person.soldier
+                    self.military.append(person)
 
     def move_soldiers(self):
         '''

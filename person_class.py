@@ -25,6 +25,7 @@ class Person(object):
         self.first_name = self.first_name_gen() 
         self.last_name  = Person.last_name_gen() 
         self.name       = self.first_name + ' ' + self.last_name
+        self.title      = None
         self.age        = 0
         
         #RELATIONS
@@ -102,6 +103,8 @@ class Person(object):
         self.make_wine:  Wine,
         }
 
+        if self.job == self.soldier:
+            return
         if self.job != self.farm and \
         job_market_dict[self.job] in self.listings and \
         self.listings[job_market_dict[self.job]] == 0:
@@ -230,6 +233,9 @@ class Person(object):
         if Plow in self.owns and len(self.owns[Plow]) > 0:
             production += randint(0, 2)
         self.food += randint(0, production)
+        
+    def soldier(self, economy):
+        pass
 
     def make_plow(self, economy):
         for i in range( randint(1, 2) ):

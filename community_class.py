@@ -42,6 +42,12 @@ class Community(object):
                 person.remove_self_from_parents_children()
                 if person.home_address:
                     person.home_address.occupants.remove(person) 
+        
+        if self.government:
+            for soldier in self.government.military:
+                if soldier.alive == False:
+                    self.government.military.remove(soldier)
+
         for market in self.economy.keys():
             self.update_market(market) 
 
@@ -153,10 +159,14 @@ class Community(object):
                 if  most_proud == None or person.pride > most_proud.pride:
                     most_proud = person
             if not self.government:
+                print('no government, so insurrection')
                 new_government = Government()
+                new_government.communities.append(self)
                 new_government.leader = most_proud
+                new_government.coronation()
                 if self.government:
                     new_government.food = self.government.food
                 self.government = new_government
             else:
                 self.government.leader = most_proud
+                self.government.coronation()
