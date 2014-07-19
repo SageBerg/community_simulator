@@ -6,4 +6,3 @@ for name in last_name_file:
     last_name_set.add(name.strip())
 
 last_list = list(last_name_set)
-last_list = list(last_name_set)
